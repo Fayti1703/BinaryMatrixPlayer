@@ -12,7 +12,12 @@ namespace BinaryMatrix.Engine;
  *
  * (honestly optimizing this doesn't matter except for rapidly simulating games, so this is more of an academic thing)
  */
-/* Note on ordering: For optimization purposes,  */
+/* Note on ordering: For optimization purposes, these lists are typically ordered such that the 'next card to remove' is the last item in the list.
+ * What 'next card to remove' means depends on the list:
+ * * For attacker/defender stacks, this is the last played card.
+ * * For lane decks and the attacker draw deck, this is the next card to draw.
+ * * For discard piles, this is undefined; so we simply use the last inserted card.
+ */
 public sealed class CardList : IEnumerable<Card>, IDisposable {
 
 	private const bool FAIL_FAST_INVALID = true;
