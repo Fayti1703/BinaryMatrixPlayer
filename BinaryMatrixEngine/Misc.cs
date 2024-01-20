@@ -46,14 +46,16 @@ public readonly ref struct OptionalRef<T> {
 	}
 }
 
-public static class Misc {
-
+public static class OptionalRefExtensions {
 	public delegate void RefAction<T>(ref T value);
 
 	public static void Apply<T>(this OptionalRef<T> @ref, RefAction<T> action) {
 		if(@ref.HasValue)
 			action(ref @ref.Value);
 	}
+}
+
+public static class EnumerableExtensions {
 
 	public static T? FirstOrNull<T>(this IEnumerable<T> collection) where T : struct {
 		using IEnumerator<T> enumerator = collection.GetEnumerator();
