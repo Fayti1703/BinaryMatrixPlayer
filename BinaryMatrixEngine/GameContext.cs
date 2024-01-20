@@ -39,8 +39,8 @@ public sealed class GameContext : IDisposable {
 	public GameContext(
 		GameType gameType,
 		IEnumerable<Player> players,
-		GameHooks? hooks = null,
-		RNG? rng = null
+		RNG? rng = null,
+		GameHooks? hooks = null
 	) {
 		this.gameType = gameType;
 		this.players = new List<Player>(players);
@@ -49,7 +49,7 @@ public sealed class GameContext : IDisposable {
 		this.board = new GameBoard();
 	}
 
-	public GameContext(GameState state, IEnumerable<Player> players, GameHooks? hooks = null, RNG? rng = null) {
+	public GameContext(GameState state, IEnumerable<Player> players, RNG? rng = null, GameHooks? hooks = null) {
 		this.gameType = state.gameType;
 		this.TurnCounter = state.turnCounter;
 		this.Victor = state.victor;
