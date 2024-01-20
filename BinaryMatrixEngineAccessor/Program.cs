@@ -1,4 +1,4 @@
-﻿using BinaryMatrix.Engine;
+using BinaryMatrix.Engine;
 
 namespace BinaryMatrix.Accessor;
 
