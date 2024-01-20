@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{22CED42A-3C4C-4282-BB23-2B999492A3F5}"
+	ProjectSection(SolutionItems) = preProject
+		LICENSE = LICENSE
+		Directory.Build.props = Directory.Build.props
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinaryMatrixPlayer", "BinaryMatrixPlayer\BinaryMatrixPlayer.csproj", "{CC987847-A3C6-4936-A4AC-98E78DB7A034}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinaryMatrixEngine", "BinaryMatrixEngine\BinaryMatrixEngine.csproj", "{0293F48A-9458-4DE2-8E38-D6B99230D68B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinaryMatrixEngineTest", "BinaryMatrixEngineTest\BinaryMatrixEngineTest.csproj", "{F7F32029-7084-4294-848F-2658A18B701F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinaryMatrixEngineAccessor", "BinaryMatrixEngineAccessor\BinaryMatrixEngineAccessor.csproj", "{9607EAB8-E726-49CA-B565-CA60FD683165}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CC987847-A3C6-4936-A4AC-98E78DB7A034}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC987847-A3C6-4936-A4AC-98E78DB7A034}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC987847-A3C6-4936-A4AC-98E78DB7A034}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC987847-A3C6-4936-A4AC-98E78DB7A034}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0293F48A-9458-4DE2-8E38-D6B99230D68B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0293F48A-9458-4DE2-8E38-D6B99230D68B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0293F48A-9458-4DE2-8E38-D6B99230D68B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0293F48A-9458-4DE2-8E38-D6B99230D68B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F7F32029-7084-4294-848F-2658A18B701F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7F32029-7084-4294-848F-2658A18B701F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7F32029-7084-4294-848F-2658A18B701F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7F32029-7084-4294-848F-2658A18B701F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9607EAB8-E726-49CA-B565-CA60FD683165}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9607EAB8-E726-49CA-B565-CA60FD683165}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9607EAB8-E726-49CA-B565-CA60FD683165}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9607EAB8-E726-49CA-B565-CA60FD683165}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

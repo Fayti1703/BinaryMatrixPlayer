@@ -1,0 +1,12 @@
+
+# Build Output
+.bin/
+.obj/
+
+# Local Settings
+*.props.user
+*.DotSettings.user
+
+# IDE Support
+.idea/
+
