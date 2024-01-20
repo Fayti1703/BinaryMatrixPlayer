@@ -39,8 +39,8 @@ public sealed class GameContext : IDisposable {
 	public GameContext(GameType gameType, IEnumerable<Player> players, RNG rng, GameHooks? hooks = null) {
 		this.gameType = gameType;
 		this.players = new List<Player>(players);
-		this.hooks = hooks ?? GameHooks.Default;
 		this.rng = rng;
+		this.hooks = hooks ?? GameHooks.Default;
 		this.board = new GameBoard();
 	}
 
@@ -51,8 +51,8 @@ public sealed class GameContext : IDisposable {
 		this.board = state.board.Copy();
 
 		this.players = new List<Player>(players);
-		this.hooks = hooks ?? GameHooks.Default;
 		this.rng = rng;
+		this.hooks = hooks ?? GameHooks.Default;
 	}
 
 	public void Setup() {
