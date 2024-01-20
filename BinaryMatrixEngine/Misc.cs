@@ -5,6 +5,11 @@ namespace BinaryMatrix.Engine;
 
 /* cannot box a ref struct, so Object methods are not callable. */
 #pragma warning disable CS0660, CS0661
+/**
+ * <summary>A reference that can be set to an equivalent of <c>null</c>.</summary>
+ * <remarks>Equivalent to <c>Nullable&lt;ref T&gt;</c>.</remarks>
+ * <seealso cref="Nullable"/>
+ */
 public readonly ref struct OptionalRef<T> {
 #pragma warning restore CS0660, CS0661
 	private readonly ref T value;
@@ -13,8 +18,13 @@ public readonly ref struct OptionalRef<T> {
 		this.value = ref value;
 	}
 
+	/** <summary>The <c>null</c> value.</summary> */
 	public static OptionalRef<T> Empty => default;
 
+	/**
+	 * <summary>Get the value of this <see cref="OptionalRef{T}" />. This value is always a reference.</summary>
+	 * <exception cref="T:System.InvalidOperationException">This <see cref="OptionalRef{T}" /> has no valid value (i.e. <see cref="HasValue"/> is <c>false</c>).</exception>
+	 */
 	[UnscopedRef]
 	public ref T Value {
 		get {
@@ -24,6 +34,7 @@ public readonly ref struct OptionalRef<T> {
 		}
 	}
 
+	/** <summary>Indicates whether this <see cref="OptionalRef{T}" /> has a valid value.</summary> */
 	public bool HasValue => !Unsafe.IsNullRef(ref this.value);
 
 	public static bool operator ==(OptionalRef<T> a, OptionalRef<T> b) {
