@@ -1,5 +1,4 @@
 ﻿using BinaryMatrix.Engine;
-using Fayti1703.CommonLib.Enumeration;
 
 namespace BinaryMatrix.Accessor;
 

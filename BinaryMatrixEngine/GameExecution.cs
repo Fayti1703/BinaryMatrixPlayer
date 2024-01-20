@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Text.Json;
 using Fayti1703.CommonLib.Enumeration;
 
 namespace BinaryMatrix.Engine;
