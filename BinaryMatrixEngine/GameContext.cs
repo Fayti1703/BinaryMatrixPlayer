@@ -36,12 +36,7 @@ public sealed class GameContext : IDisposable {
 
 	public PlayerRole? Victor { get; private set; }
 
-	public GameContext(
-		GameType gameType,
-		IEnumerable<Player> players,
-		RNG rng,
-		GameHooks? hooks = null
-	) {
+	public GameContext(GameType gameType, IEnumerable<Player> players, RNG rng, GameHooks? hooks = null) {
 		this.gameType = gameType;
 		this.players = new List<Player>(players);
 		this.hooks = hooks ?? GameHooks.Default;
