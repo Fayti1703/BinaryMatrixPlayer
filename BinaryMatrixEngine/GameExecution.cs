@@ -295,7 +295,7 @@ public static class GameExecution {
 		return true;
 	}
 
-	public static CardList FisherYatesShuffle(Random rng, IEnumerable<Card> cards) {
+	public static CardList FisherYatesShuffle(RNG rng, IEnumerable<Card> cards) {
 		CardList cardList = new(cards);
 
 		for(int i = cardList.Count - 1; i > 0; i--) {

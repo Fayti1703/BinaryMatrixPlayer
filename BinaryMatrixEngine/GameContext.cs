@@ -29,7 +29,7 @@ public sealed class GameContext : IDisposable {
 	public IEnumerable<Player> Defenders => this.players.Where(x => x.Role == PlayerRole.DEFENDER);
 	public readonly GameBoard board;
 
-	public Random rng { get; }
+	public RNG rng { get; }
 
 	private readonly List<Player> players;
 	private readonly GameHooks hooks;
@@ -40,16 +40,16 @@ public sealed class GameContext : IDisposable {
 		GameType gameType,
 		IEnumerable<Player> players,
 		GameHooks? hooks = null,
-		Random? rng = null
+		RNG? rng = null
 	) {
 		this.gameType = gameType;
 		this.players = new List<Player>(players);
 		this.hooks = hooks ?? GameHooks.Default;
-		this.rng = rng ?? new Random();
+		this.rng = rng ?? new RandomRNG(new Random());
 		this.board = new GameBoard();
 	}
 
-	public GameContext(GameState state, IEnumerable<Player> players, GameHooks? hooks = null, Random? rng = null) {
+	public GameContext(GameState state, IEnumerable<Player> players, GameHooks? hooks = null, RNG? rng = null) {
 		this.gameType = state.gameType;
 		this.TurnCounter = state.turnCounter;
 		this.Victor = state.victor;
@@ -57,7 +57,7 @@ public sealed class GameContext : IDisposable {
 
 		this.players = new List<Player>(players);
 		this.hooks = hooks ?? GameHooks.Default;
-		this.rng = rng ?? new Random();
+		this.rng = rng ?? new RandomRNG(new Random());
 	}
 
 	public void Setup() {
@@ -106,6 +106,20 @@ public sealed class GameContext : IDisposable {
 	public void Dispose() {
 		this.board.Dispose();
 	}
+}
+
+public interface RNG {
+	/** <summary>Return a new random value, in the range <c>[0;rangeEnd[</c>.</summary> */
+	int Next(int upperBound);
+}
+
+public class RandomRNG : RNG {
+	private readonly Random random;
+
+	public RandomRNG(Random random) {
+		this.random = random;
+	}
+	public int Next(int upperBound) => this.random.Next(upperBound);
 }
 
 [PublicAPI]
