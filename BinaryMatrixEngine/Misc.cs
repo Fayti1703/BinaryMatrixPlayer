@@ -54,25 +54,3 @@ public static class OptionalRefExtensions {
 			action(ref @ref.Value);
 	}
 }
-
-public static class EnumerableExtensions {
-
-	public static T? FirstOrNull<T>(this IEnumerable<T> collection) where T : struct {
-		using IEnumerator<T> enumerator = collection.GetEnumerator();
-
-		if(enumerator.MoveNext())
-			return enumerator.Current;
-
-		return null;
-	}
-
-	public static T? FirstOrNull<T>(this IEnumerable<T> collection, Predicate<T> predicate) where T : struct {
-		foreach(T candidate in collection) {
-			if(predicate(candidate))
-				return candidate;
-		}
-
-		return null;
-	}
-
-}
