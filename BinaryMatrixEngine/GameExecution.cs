@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Diagnostics;
 using Fayti1703.CommonLib.Enumeration;
 
@@ -97,7 +98,7 @@ public static class GameExecution {
 					switch(newCard.Value) {
 						case Value.BREAK:
 						case Value.BOUNCE when stackEmpty && player.Role == PlayerRole.ATTACKER:
-							ResolveCombat(context, lane, player);
+							ResolveCombat(context, lane, player, out _);
 							break;
 					}
 				}
@@ -125,14 +126,16 @@ public static class GameExecution {
 				if(player.Role == PlayerRole.DEFENDER) return OperationError.WRONG_ROLE;
 				Lane lane = context.board.GetLane(action.lane);
 				if(lane.attackerStack.cards.Count == 0) return OperationError.EMPTY_STACK;
-				ResolveCombat(context, lane, player);
+				ResolveCombat(context, lane, player, out _);
 			} break;
 		}
 
 		return OperationError.NONE;
 	}
 
-	private static void ResolveTraps(GameContext context, Cell scanDeck, Cell targetDeck, Cell discardPile) {
+	private static void ResolveTraps(GameContext context, Cell scanDeck, Cell targetDeck, Cell discardPile, out IReadOnlyList<CardMoveLog>? results) {
+		CardMoveLogBuilder log = default;
+		results = null;
 		if(scanDeck.Revealed) return;
 		foreach(ref Card card in scanDeck.cards) {
 			if(card.revealed)
@@ -142,20 +145,31 @@ public static class GameExecution {
 				continue;
 			Card trapped = targetDeck.cards.TakeLast()!.Value;
 			trapped.revealed = true;
+			log.Add(trapped.ID, discardPile.name);
 			discardPile.cards.Add(trapped);
 		}
 
 		scanDeck.Revealed = true;
+		results = log.FinishOptional();
 	}
 
-	private static void ResolveCombat(GameContext context, Lane lane, Player player) {
+	private static void ResolveCombat(GameContext context, Lane lane, Player player, out CombatLog combatLog) {
+		CombatLogBuilder log = new() {
+			inLane = lane.laneNo,
+			initialAS = lane.attackerStack.cards.Select(x => x.ID).ToImmutableList(),
+			initialDS = lane.defenderStack.cards.Select(x => x.ID).ToImmutableList()
+		};
 		bool defenseFirst = player.Role == PlayerRole.DEFENDER;
 		if(defenseFirst) {
-			ResolveTraps(context, lane.defenderStack, lane.attackerStack, lane.discardPile);
-			ResolveTraps(context, lane.attackerStack, lane.defenderStack, context.board[XA]);
+			ResolveTraps(context, lane.defenderStack, lane.attackerStack, lane.discardPile, out IReadOnlyList<CardMoveLog>? defTraps);
+			if(defTraps != null) log.AddSpecialLog(new CombatSpecialLog(SpecialType.TRAP, PlayerRole.DEFENDER, defTraps));
+			ResolveTraps(context, lane.attackerStack, lane.defenderStack, context.board[XA], out IReadOnlyList<CardMoveLog>? atkTraps);
+			if(atkTraps != null) log.AddSpecialLog(new CombatSpecialLog(SpecialType.TRAP, PlayerRole.ATTACKER, atkTraps));
 		} else {
-			ResolveTraps(context, lane.attackerStack, lane.defenderStack, context.board[XA]);
-			ResolveTraps(context, lane.defenderStack, lane.attackerStack, lane.discardPile);
+			ResolveTraps(context, lane.attackerStack, lane.defenderStack, context.board[XA], out IReadOnlyList<CardMoveLog>? atkTraps);
+			if(atkTraps != null) log.AddSpecialLog(new CombatSpecialLog(SpecialType.TRAP, PlayerRole.ATTACKER, atkTraps));
+			ResolveTraps(context, lane.defenderStack, lane.attackerStack, lane.discardPile, out IReadOnlyList<CardMoveLog>? defTraps);
+			if(defTraps != null) log.AddSpecialLog(new CombatSpecialLog(SpecialType.TRAP, PlayerRole.DEFENDER, defTraps));
 		}
 
 		bool hasBounces =
@@ -172,64 +186,82 @@ public static class GameExecution {
 			dpow = CalculateStackPower(lane.defenderStack);
 		}
 
+		log.attackerPower = apow;
+		log.defenderPower = dpow;
+
 		if(hasBounces) {
 			if(defenseFirst) {
-				DiscardBounces(context, lane.defenderStack, context.board[XA]);
-				DiscardBounces(context, lane.attackerStack, lane.discardPile);
+				DiscardBounces(context, lane.defenderStack, context.board[XA], out IReadOnlyList<CardMoveLog>? defBounces);
+				if(defBounces != null) log.AddSpecialLog(new CombatSpecialLog(SpecialType.BOUNCE, PlayerRole.DEFENDER, defBounces));
+				DiscardBounces(context, lane.attackerStack, lane.discardPile, out IReadOnlyList<CardMoveLog>? atkBounces);
+				if(atkBounces != null) log.AddSpecialLog(new CombatSpecialLog(SpecialType.BOUNCE, PlayerRole.DEFENDER, atkBounces));
 			} else {
-				DiscardBounces(context, lane.attackerStack, lane.discardPile);
-				DiscardBounces(context, lane.defenderStack, context.board[XA]);
+				DiscardBounces(context, lane.attackerStack, lane.discardPile, out IReadOnlyList<CardMoveLog>? atkBounces);
+				if(atkBounces != null) log.AddSpecialLog(new CombatSpecialLog(SpecialType.BOUNCE, PlayerRole.DEFENDER, atkBounces));
+				DiscardBounces(context, lane.defenderStack, context.board[XA], out IReadOnlyList<CardMoveLog>? defBounces);
+				if(defBounces != null) log.AddSpecialLog(new CombatSpecialLog(SpecialType.BOUNCE, PlayerRole.DEFENDER, defBounces));
 			}
 		}
 
 		if(apow == 0 && dpow == 0) {
 			/* No combat victor. ("Bounce") */
+			log.results.Add(lane.attackerStack.cards.Select(x => x.ID), XA);
 			lane.attackerStack.cards.MoveAllTo(context.board[XA].cards);
 			lane.attackerStack.Revealed = false;
 			if(lane.defenderStack.cards.Count == 0)
 				lane.defenderStack.Revealed = false;
+			combatLog = log.Finish();
 			return;
 		}
 
 		if(dpow > apow) {
 			/* Defender victory. */
+			log.damage = -1;
+			log.results.Add(lane.attackerStack.cards.Select(x => x.ID), lane.discardPile.name);
 			lane.attackerStack.cards.MoveAllTo(lane.discardPile.cards);
 			lane.attackerStack.Revealed = false;
 			if(lane.defenderStack.cards.Count == 0) /* shouldn't be possible, but best to be prudent */
 				lane.defenderStack.Revealed = false;
+			combatLog = log.Finish();
 			return;
 		}
 
 		Debug.Assert(apow >= dpow);
 		bool hasBreak = lane.attackerStack.cards.Any(x => x.Value == Value.BREAK) || lane.defenderStack.cards.Any(x => x.Value == Value.BREAK);
+		log.results.Add(lane.attackerStack.cards.Select(x => x.ID), XA);
+		log.results.EndCurrentSet();
 		lane.attackerStack.cards.MoveAllTo(context.board[XA].cards);
 		int damage = hasBreak ? Math.Max(lane.defenderStack.cards.Count, apow) : apow - dpow + 1;
-		/* BINLOG: record damage here */
+		log.damage = damage;
 
 		while(damage > 0) {
 			Card? card = lane.defenderStack.cards.TakeLast();
 			if(card == null) break;
+			log.results.Add(card.Value.ID, XA);
 			context.board[XA].cards.Add(card.Value);
 			damage--;
 		}
 
 		if(damage > 0) {
 			if(player.Role == PlayerRole.ATTACKER) {
+				PlayerID attackerID = context.GetPlayerID(player);
 				while(damage > 0) {
-					if(!TryDraw(context, lane.laneDeck, player, out _)) {
+					if(!TryDraw(context, lane.laneDeck, player, out CardID logCard)) {
 						context.SetVictor(PlayerRole.ATTACKER);
 						break;
 					}
+					log.results.Add(logCard, attackerID);
 					damage--;
 				}
 			} else {
 				while(damage > 0) {
-					foreach(Player attacker in context.Attackers) {
+					foreach((int index, Player attacker) in context.Attackers.WithIndex()) {
 						if(damage == 0) break;
-						if(!TryDraw(context, lane.laneDeck, attacker, out _)) {
+						if(!TryDraw(context, lane.laneDeck, attacker, out CardID logCard)) {
 							context.SetVictor(PlayerRole.ATTACKER);
 							goto endLp;
 						}
+						log.results.Add(logCard, new PlayerID(PlayerRole.ATTACKER, index));
 						damage--;
 					}
 				}
@@ -241,15 +273,20 @@ public static class GameExecution {
 		if(lane.defenderStack.cards.Count == 0)
 			lane.defenderStack.Revealed = false;
 
+		combatLog = log.Finish();
 	}
 
-	private static void DiscardBounces(GameContext context, Cell scanDeck, Cell discardDeck) {
+	private static void DiscardBounces(GameContext context, Cell scanDeck, Cell discardDeck, out IReadOnlyList<CardMoveLog>? results) {
+		CardMoveLogBuilder log = default;
 		for(int i = 0; i < scanDeck.cards.Count; i++) {
 			if(scanDeck.cards[i].Value != Value.BOUNCE)
 				continue;
-			discardDeck.cards.Add(scanDeck.cards.Take(i)!.Value);
+			Card bounce = scanDeck.cards.Take(i)!.Value;
+			discardDeck.cards.Add(bounce);
+			log.Add(bounce.ID, discardDeck.name);
 			i--;
 		}
+		results = log.FinishOptional();
 	}
 
 	private static int CalculateStackPower(Cell stack) {
