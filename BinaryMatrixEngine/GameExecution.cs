@@ -21,7 +21,7 @@ public enum OperationError {
 
 public static class GameExecution {
 	public static void ExecutePlayerTurn(GameContext context, Player player, ActionSet action, HashSet<Cell> drawnDecks) {
-		OperationError error = ExecutePlayerAction(context, player, action, drawnDecks);
+		OperationError error = ExecutePlayerAction(context, player, action, drawnDecks, out _);
 		if(error != OperationError.NONE) {
 			player.ReportOperationError(error);
 			player.InvalidOperationCount++;
@@ -51,15 +51,22 @@ public static class GameExecution {
 		player.Hand.Clear();
 	}
 
-	public static OperationError ExecutePlayerAction(GameContext context, Player player, ActionSet action, HashSet<Cell> drawnDecks) {
+	public static OperationError ExecutePlayerAction(GameContext context, Player player, ActionSet action, HashSet<Cell> drawnDecks, out ActionLog log) {
+		log = new ActionLog(context.GetPlayerID(player), new ResolvedActionSet(ActionType.NONE), null);
 		switch(action.type) {
 			case ActionType.NONE:
+				log = new ActionLog(log.whoDidThis, new ResolvedActionSet(ActionType.NONE, explicitNone: true), null);
 				return OperationError.NO_ACTION;
 			case ActionType.DRAW: {
 				if(action.lane == ActionSet.LANE_A) {
 					if(player.Role == PlayerRole.ATTACKER) return OperationError.WRONG_ROLE;
-					bool drawOK = TryDraw(context, context.board[DA], player, out _);
+					bool drawOK = TryDraw(context, context.board[DA], player, out CardID drawnCard);
 					if(!drawOK) return OperationError.EMPTY_STACK;
+					log = new ActionLog(
+						log.whoDidThis,
+						new ResolvedActionSet(ActionType.DRAW, ActionSet.LANE_A),
+						CardMoveLog.SingleMove(drawnCard, log.whoDidThis)
+					);
 				} else {
 					Lane lane = context.board.GetLane(action.lane);
 					if(player.Role == PlayerRole.ATTACKER) {
@@ -67,11 +74,22 @@ public static class GameExecution {
 						if(!drawnDecks.Add(lane.laneDeck)) return OperationError.DOUBLE_DRAW;
 					}
 
-					bool drawOK = TryDraw(context, lane.laneDeck, player, out _);
+					bool drawOK = TryDraw(context, lane.laneDeck, player, out CardID drawnCard);
 					if(!drawOK) {
 						if(player.Role == PlayerRole.DEFENDER) return OperationError.EMPTY_STACK;
 						context.SetVictor(PlayerRole.ATTACKER);
+						log = new ActionLog(
+							log.whoDidThis,
+							new ResolvedActionSet(ActionType.DRAW, action.lane),
+							ImmutableList<CardMoveLog>.Empty
+						);
 					}
+
+					log = new ActionLog(
+						log.whoDidThis,
+						new ResolvedActionSet(ActionType.DRAW, action.lane),
+						CardMoveLog.SingleMove(drawnCard, log.whoDidThis)
+					);
 				}
 			} break;
 			case ActionType.PLAY:
@@ -93,15 +111,29 @@ public static class GameExecution {
 				}
 
 				ref Card newCard = ref stack.cards.Add(player.Hand.Take(index)!.Value);
+
+				CardID logCard = action.type == ActionType.FACEUP_PLAY ? newCard.ID : CardID.Unknown;
+				ResolvedActionSet resolvedAction = new(action.type, logCard, action.lane);
+				IReadOnlyList<CardMoveLog> moveLog = CardMoveLog.SingleMove(logCard, stack.name);
+
+				CombatLog? optCombatLog = default;
 				if(action.type == ActionType.FACEUP_PLAY) {
 					newCard.revealed = true;
 					switch(newCard.Value) {
 						case Value.BREAK:
 						case Value.BOUNCE when stackEmpty && player.Role == PlayerRole.ATTACKER:
-							ResolveCombat(context, lane, player, out _);
+							ResolveCombat(context, lane, player, out CombatLog combatLog);
+							optCombatLog = combatLog;
 							break;
 					}
 				}
+
+				log = new ActionLog(
+					log.whoDidThis,
+					resolvedAction,
+					moveLog,
+					optCombatLog
+				);
 			} break;
 			case ActionType.DISCARD: {
 				Indexed<Card>? result = ResolveCard(action.card!, player);
@@ -111,14 +143,29 @@ public static class GameExecution {
 					if(player.Role == PlayerRole.DEFENDER) return OperationError.WRONG_ROLE;
 					if(context.board[DA].cards.Count == 0 && context.board[XA].cards.Count == 0)
 						return OperationError.EMPTY_STACK;
-					context.board[XA].cards.Add(player.Hand.Take(result.Value.index)!.Value).revealed = true;
-					bool drawOK = TryDraw(context, context.board[DA], player, out _);
+					ref Card discarded = ref context.board[XA].cards.Add(player.Hand.Take(result.Value.index)!.Value);
+					discarded.revealed = true;
+					bool drawOK = TryDraw(context, context.board[DA], player, out CardID firstCard);
 					Debug.Assert(drawOK);
-					drawOK = TryDraw(context, context.board[DA], player, out _);
+					drawOK = TryDraw(context, context.board[DA], player, out CardID secondCard);
 					Debug.Assert(drawOK);
+					log = new ActionLog(
+						log.whoDidThis,
+						new ResolvedActionSet(ActionType.DISCARD, discarded.ID, ActionSet.LANE_A),
+						new[] {
+							new CardMoveLog(new[] { discarded.ID }, XA),
+							new CardMoveLog(new[] { firstCard, secondCard }, log.whoDidThis)
+						}
+					);
 				} else {
 					if(player.Role == PlayerRole.ATTACKER) return OperationError.WRONG_ROLE;
-					context.board[X0 + action.lane].cards.Add(player.Hand.Take(result.Value.index)!.Value).revealed = true;
+					ref Card discarded = ref context.board[X0 + action.lane].cards.Add(player.Hand.Take(result.Value.index)!.Value);
+					discarded.revealed = true;
+					log = new ActionLog(
+						log.whoDidThis,
+						new ResolvedActionSet(ActionType.DISCARD, discarded.ID, action.lane),
+						CardMoveLog.SingleMove(discarded.ID, X0 + action.lane)
+					);
 				}
 			} break;
 			case ActionType.COMBAT: {
@@ -126,7 +173,13 @@ public static class GameExecution {
 				if(player.Role == PlayerRole.DEFENDER) return OperationError.WRONG_ROLE;
 				Lane lane = context.board.GetLane(action.lane);
 				if(lane.attackerStack.cards.Count == 0) return OperationError.EMPTY_STACK;
-				ResolveCombat(context, lane, player, out _);
+				ResolveCombat(context, lane, player, out CombatLog combatLog);
+				log = new ActionLog(
+					log.whoDidThis,
+					new ResolvedActionSet(ActionType.COMBAT, action.lane),
+					null,
+					combatLog
+				);
 			} break;
 		}
 
@@ -248,6 +301,7 @@ public static class GameExecution {
 				while(damage > 0) {
 					if(!TryDraw(context, lane.laneDeck, player, out CardID logCard)) {
 						context.SetVictor(PlayerRole.ATTACKER);
+						log.victorDeclared = true;
 						break;
 					}
 					log.results.Add(logCard, attackerID);
@@ -259,6 +313,7 @@ public static class GameExecution {
 						if(damage == 0) break;
 						if(!TryDraw(context, lane.laneDeck, attacker, out CardID logCard)) {
 							context.SetVictor(PlayerRole.ATTACKER);
+							log.victorDeclared = true;
 							goto endLp;
 						}
 						log.results.Add(logCard, new PlayerID(PlayerRole.ATTACKER, index));
