@@ -98,7 +98,8 @@ public sealed class CardList : IEnumerable<Card>, IDisposable {
 	}
 
 	public void Clear() {
-		listPool.Return(Exchange(ref this.cards, Array.Empty<Card>()));
+		if(this.cards.Length > 0)
+			listPool.Return(Exchange(ref this.cards, Array.Empty<Card>()));
 		this.Count = 0;
 	}
 
