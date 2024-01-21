@@ -116,7 +116,7 @@ public class CommandExecution {
 
 	public static void WriteCard(Card card) {
 		WriteWithColor(
-			card.axiom switch {
+			card.Axiom switch {
 				Axiom.DATA => ConsoleColor.Gray,
 				Axiom.KIN => ConsoleColor.Cyan,
 				Axiom.FORM => ConsoleColor.Green,

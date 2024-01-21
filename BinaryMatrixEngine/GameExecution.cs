@@ -85,16 +85,16 @@ public static class GameExecution {
 				if(stack.Revealed && action.type == ActionType.PLAY) return OperationError.WRONG_FACING;
 
 				bool stackEmpty = stack.cards.Count == 0;
-				if(card.value == Value.BREAK) {
+				if(card.Value == Value.BREAK) {
 					if(stackEmpty) return OperationError.BREAK_ON_EMPTY;
-					if(player.Role == PlayerRole.DEFENDER && stack.Revealed && stack.cards.Any(x => x.value == Value.BREAK))
+					if(player.Role == PlayerRole.DEFENDER && stack.Revealed && stack.cards.Any(x => x.Value == Value.BREAK))
 						return OperationError.DOUBLE_FACEUP_BREAK_IN_DEFENSE;
 				}
 
 				ref Card newCard = ref stack.cards.Add(player.Hand.Take(index)!.Value);
 				if(action.type == ActionType.FACEUP_PLAY) {
 					newCard.revealed = true;
-					switch(newCard.value) {
+					switch(newCard.Value) {
 						case Value.BREAK:
 						case Value.BOUNCE when stackEmpty && player.Role == PlayerRole.ATTACKER:
 							ResolveCombat(context, lane, player);
@@ -138,7 +138,7 @@ public static class GameExecution {
 			if(card.revealed)
 				continue;
 			card.revealed = true;
-			if(card.value != Value.TRAP || targetDeck.cards.Count <= 0)
+			if(card.Value != Value.TRAP || targetDeck.cards.Count <= 0)
 				continue;
 			Card trapped = targetDeck.cards.TakeLast()!.Value;
 			trapped.revealed = true;
@@ -159,8 +159,8 @@ public static class GameExecution {
 		}
 
 		bool hasBounces =
-			lane.attackerStack.cards.Any(x => x.value == Value.BOUNCE) ||
-			lane.defenderStack.cards.Any(x => x.value == Value.BOUNCE)
+			lane.attackerStack.cards.Any(x => x.Value == Value.BOUNCE) ||
+			lane.defenderStack.cards.Any(x => x.Value == Value.BOUNCE)
 		;
 
 		int apow; int dpow;
@@ -201,7 +201,7 @@ public static class GameExecution {
 		}
 
 		Debug.Assert(apow >= dpow);
-		bool hasBreak = lane.attackerStack.cards.Any(x => x.value == Value.BREAK) || lane.defenderStack.cards.Any(x => x.value == Value.BREAK);
+		bool hasBreak = lane.attackerStack.cards.Any(x => x.Value == Value.BREAK) || lane.defenderStack.cards.Any(x => x.Value == Value.BREAK);
 		lane.attackerStack.cards.MoveAllTo(context.board[XA].cards);
 		int damage = hasBreak ? Math.Max(lane.defenderStack.cards.Count, apow) : apow - dpow + 1;
 		/* BINLOG: record damage here */
@@ -245,7 +245,7 @@ public static class GameExecution {
 
 	private static void DiscardBounces(GameContext context, Cell scanDeck, Cell discardDeck) {
 		for(int i = 0; i < scanDeck.cards.Count; i++) {
-			if(scanDeck.cards[i].value != Value.BOUNCE)
+			if(scanDeck.cards[i].Value != Value.BOUNCE)
 				continue;
 			discardDeck.cards.Add(scanDeck.cards.Take(i)!.Value);
 			i--;
@@ -256,12 +256,12 @@ public static class GameExecution {
 		int cardSum = 0;
 		int wildCount = 0;
 		foreach(Card card in stack.cards) {
-			switch(card.value) {
+			switch(card.Value) {
 				case Value.WILD:
 					wildCount++;
 					break;
 				case >= Value.TWO and <= Value.TEN:
-					cardSum += (int) card.value;
+					cardSum += (int) card.Value;
 					break;
 			}
 		}
