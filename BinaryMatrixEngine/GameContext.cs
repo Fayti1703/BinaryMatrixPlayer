@@ -35,23 +35,22 @@ public sealed class GameContext : IDisposable {
 
 	public PlayerRole? Victor { get; private set; }
 
-	public GameContext(GameType gameType, IEnumerable<Player> players, RNG rng, GameHooks? hooks = null) {
-		this.gameType = gameType;
+	private GameContext(IEnumerable<Player> players, RNG rng, GameHooks? hooks) {
 		this.players = new List<Player>(players);
 		this.rng = rng;
 		this.hooks = hooks ?? GameHooks.Default;
+	}
+
+	public GameContext(GameType gameType, IEnumerable<Player> players, RNG rng, GameHooks? hooks = null) : this(players, rng, hooks) {
+		this.gameType = gameType;
 		this.board = new GameBoard();
 	}
 
-	public GameContext(GameState state, IEnumerable<Player> players, RNG rng, GameHooks? hooks = null) {
+	public GameContext(GameState state, IEnumerable<Player> players, RNG rng, GameHooks? hooks = null) : this(players, rng, hooks) {
 		this.gameType = state.gameType;
 		this.TurnCounter = state.turnCounter;
 		this.Victor = state.victor;
 		this.board = state.board.Copy();
-
-		this.players = new List<Player>(players);
-		this.rng = rng;
-		this.hooks = hooks ?? GameHooks.Default;
 	}
 
 	public void Setup() {
