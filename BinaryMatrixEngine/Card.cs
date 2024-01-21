@@ -61,6 +61,15 @@ public readonly struct CardID : IEquatable<CardID> {
 
 	public static readonly IReadOnlyList<CardID> allIDs;
 
+	override public string ToString() {
+		return this.IsUnknown ? "X" :
+				new string(new [] {
+					Card.ValueToSymbol(this.value),
+					Card.AxiomToSymbol(this.axiom)
+				})
+		;
+	}
+
 	public bool Equals(CardID other) => this.axiom == other.axiom && this.value == other.value;
 	override public bool Equals(object? obj) => obj is CardID other && Equals(other);
 	override public int GetHashCode() => HashCode.Combine((int) this.axiom, (int) this.value);
@@ -162,12 +171,7 @@ public struct Card : IEquatable<Card> {
 	}
 
 	override public string ToString() {
-		if(this.value == 0 || this.axiom == 0)
-			return "(( DEFAULT CARD ))";
-		if(this.IsInvalid)
-			return "(( INVALID CARD ))";
-
-		return new string(new [] { ValueToSymbol(this.value), AxiomToSymbol(this.axiom) });
+		return this.ID + (this.revealed ? "u" : "");
 	}
 
 	public string DebugDisplay() {
