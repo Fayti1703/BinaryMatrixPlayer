@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using JetBrains.Annotations;
 
 namespace BinaryMatrix.Engine;
@@ -24,19 +25,31 @@ public struct GameState {
 public sealed class GameContext : IDisposable {
 	public readonly GameType gameType;
 	public int TurnCounter { get; private set; }
-	public IEnumerable<Player> Attackers => this.players.Where(x => x.Role == PlayerRole.ATTACKER);
-	public IEnumerable<Player> Defenders => this.players.Where(x => x.Role == PlayerRole.DEFENDER);
+	public IReadOnlyList<Player> Attackers { get; }
+	public IReadOnlyList<Player> Defenders { get; }
 	public readonly GameBoard board;
 
 	public RNG rng { get; }
 
-	private readonly List<Player> players;
+	private IEnumerable<Player> Players => this.Attackers.Concat(this.Defenders);
 	private readonly GameHooks hooks;
 
 	public PlayerRole? Victor { get; private set; }
 
 	private GameContext(IEnumerable<Player> players, RNG rng, GameHooks? hooks) {
-		this.players = new List<Player>(players);
+		/* fallbacks */
+		this.Attackers = ImmutableList<Player>.Empty;
+		this.Defenders = ImmutableList<Player>.Empty;
+		foreach(IGrouping<PlayerRole,Player> group in players.GroupBy(x => x.Role)) {
+			switch(group.Key) {
+				case PlayerRole.ATTACKER:
+					this.Attackers = group.ToList();
+					break;
+				case PlayerRole.DEFENDER:
+					this.Defenders = group.ToList();
+					break;
+			}
+		}
 		this.rng = rng;
 		this.hooks = hooks ?? GameHooks.Default;
 	}
@@ -56,7 +69,7 @@ public sealed class GameContext : IDisposable {
 	public void Setup() {
 		/* Clean any remaining state from possible previous runs */
 		this.board.Clear();
-		foreach(Player player in this.players)
+		foreach(Player player in this.Players)
 			player.InvalidOperationCount = 0;
 		this.Victor = null;
 
