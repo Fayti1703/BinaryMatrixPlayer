@@ -117,4 +117,10 @@ public sealed class GameBoard : IDisposable {
 			cell.Dispose();
 		}
 	}
+
+	public void Clear() {
+		foreach(Cell cell in this.cells) {
+			cell.cards.Clear();
+		}
+	}
 }

@@ -55,6 +55,12 @@ public sealed class GameContext : IDisposable {
 	}
 
 	public void Setup() {
+		/* Clean any remaining state from possible previous runs */
+		this.board.Clear();
+		foreach(Player player in this.players)
+			player.InvalidOperationCount = 0;
+		this.Victor = null;
+
 		this.hooks.PreGamePrep(this);
 		this.board[CellName.L3].cards.Last().Apply((ref Card x) => x.revealed = true);
 		this.board[CellName.L4].cards.Last().Apply((ref Card x) => x.revealed = true);
