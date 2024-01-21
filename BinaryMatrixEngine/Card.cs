@@ -141,10 +141,15 @@ public readonly struct CardID : IEquatable<CardID> {
 public struct Card : IEquatable<Card> {
 	public readonly CardID ID;
 	/* @@suppress-name-violation: migration */
+	[Obsolete("Use `Axiom` instead.")]
 	public readonly Axiom axiom => this.ID.axiom;
 	/* @@suppress-name-violation: migration */
+	[Obsolete("Use `Value` instead.")]
 	public readonly Value value => this.ID.value;
 	public bool revealed = false;
+
+	public readonly Axiom Axiom => this.ID.axiom;
+	public readonly Value Value => this.ID.value;
 
 	public Card(CardID id) {
 		this.ID = id;
