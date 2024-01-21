@@ -64,51 +64,17 @@ public readonly struct CardID : IEquatable<CardID> {
 	override public string ToString() {
 		return this.IsUnknown ? "X" :
 				new string(new [] {
-					Card.ValueToSymbol(this.value),
-					Card.AxiomToSymbol(this.axiom)
+					ValueToSymbol(this.value),
+					AxiomToSymbol(this.axiom)
 				})
 		;
 	}
 
 	public bool Equals(CardID other) => this.axiom == other.axiom && this.value == other.value;
-	override public bool Equals(object? obj) => obj is CardID other && Equals(other);
+	override public bool Equals(object? obj) => obj is CardID other && this.Equals(other);
 	override public int GetHashCode() => HashCode.Combine((int) this.axiom, (int) this.value);
 	public static bool operator ==(CardID left, CardID right) => left.Equals(right);
 	public static bool operator !=(CardID left, CardID right) => !left.Equals(right);
-}
-
-[DebuggerDisplay("{DebugDisplay()}")]
-public struct Card : IEquatable<Card> {
-	public readonly CardID ID;
-	/* @@suppress-name-violation: migration */
-	public readonly Axiom axiom => this.ID.axiom;
-	/* @@suppress-name-violation: migration */
-	public readonly Value value => this.ID.value;
-	public bool revealed = false;
-
-	public Card(CardID id) {
-		this.ID = id;
-	}
-
-	public Card(Axiom axiom, Value value) {
-		this.ID = new CardID(axiom, value);
-	}
-
-	/* A particular card cannot ever have an unknown ID. */
-	public bool IsInvalid => this.ID.IsUnknown;
-
-	public bool Equals(Card other) => this.ID == other.ID;
-	override public bool Equals(object? obj) => obj is Card other && this.Equals(other);
-	override public int GetHashCode() => this.ID.GetHashCode();
-
-	public static bool operator ==(Card left, Card right) => left.Equals(right);
-	public static bool operator !=(Card left, Card right) => !left.Equals(right);
-
-	static Card() {
-		allCards = CardID.allIDs.Select(x => new Card(x)).ToImmutableList();
-	}
-
-	public static readonly IReadOnlyList<Card> allCards;
 
 	public static Axiom? AxiomFromSymbol(char c) {
 		return c switch {
@@ -169,6 +135,40 @@ public struct Card : IEquatable<Card> {
 			Value.TRAP => '@'
 		};
 	}
+}
+
+[DebuggerDisplay("{DebugDisplay()}")]
+public struct Card : IEquatable<Card> {
+	public readonly CardID ID;
+	/* @@suppress-name-violation: migration */
+	public readonly Axiom axiom => this.ID.axiom;
+	/* @@suppress-name-violation: migration */
+	public readonly Value value => this.ID.value;
+	public bool revealed = false;
+
+	public Card(CardID id) {
+		this.ID = id;
+	}
+
+	public Card(Axiom axiom, Value value) {
+		this.ID = new CardID(axiom, value);
+	}
+
+	/* A particular card cannot ever have an unknown ID. */
+	public bool IsInvalid => this.ID.IsUnknown;
+
+	public bool Equals(Card other) => this.ID == other.ID;
+	override public bool Equals(object? obj) => obj is Card other && this.Equals(other);
+	override public int GetHashCode() => this.ID.GetHashCode();
+
+	public static bool operator ==(Card left, Card right) => left.Equals(right);
+	public static bool operator !=(Card left, Card right) => !left.Equals(right);
+
+	static Card() {
+		allCards = CardID.allIDs.Select(x => new Card(x)).ToImmutableList();
+	}
+
+	public static readonly IReadOnlyList<Card> allCards;
 
 	override public string ToString() {
 		return this.ID + (this.revealed ? "u" : "");
