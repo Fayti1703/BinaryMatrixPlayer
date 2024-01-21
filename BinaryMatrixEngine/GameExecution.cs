@@ -76,7 +76,7 @@ public static class GameExecution {
 			case ActionType.PLAY:
 			case ActionType.FACEUP_PLAY: {
 				if(action.lane == ActionSet.LANE_A) return OperationError.UNKNOWN_LANE;
-				Indexed<Card>? result = ResolveCard(action.card, player);
+				Indexed<Card>? result = ResolveCard(action.card!, player);
 				if(result == null) return OperationError.UNKNOWN_CARD;
 
 				(int index, Card card) = result.Value;
@@ -103,7 +103,7 @@ public static class GameExecution {
 				}
 			} break;
 			case ActionType.DISCARD: {
-				Indexed<Card>? result = ResolveCard(action.card, player);
+				Indexed<Card>? result = ResolveCard(action.card!, player);
 				if(result == null) return OperationError.UNKNOWN_CARD;
 
 				if(action.lane == ActionSet.LANE_A) {
