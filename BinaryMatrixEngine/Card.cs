@@ -47,7 +47,7 @@ public struct Card : IEquatable<Card> {
 		if(axiom < Axiom.DATA || axiom > Axiom.CHOICE)
 			throw new ArgumentException("Invalid suit provided.", nameof(axiom));
 		if(value < Value.TWO || value > Value.TRAP)
-			throw new ArgumentException("Invalid value provided.", nameof(axiom));
+			throw new ArgumentException("Invalid value provided.", nameof(value));
 		this.axiom = axiom;
 		this.value = value;
 	}
