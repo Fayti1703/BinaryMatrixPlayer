@@ -62,3 +62,13 @@ public interface Player : IDisposable {
 	public int InvalidOperationCount { get; set; }
 	public CardList Hand { get; }
 }
+
+public readonly struct PlayerID {
+	public readonly PlayerRole role;
+	public readonly int index;
+
+	public PlayerID(PlayerRole role, int index) {
+		this.role = role;
+		this.index = index;
+	}
+}

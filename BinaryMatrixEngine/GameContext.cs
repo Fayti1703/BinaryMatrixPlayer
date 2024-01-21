@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Fayti1703.CommonLib.Enumeration;
 using JetBrains.Annotations;
 
 namespace BinaryMatrix.Engine;
@@ -117,6 +118,12 @@ public sealed class GameContext : IDisposable {
 
 	public void Dispose() {
 		this.board.Dispose();
+	}
+
+	public PlayerID GetPlayerID(Player player) {
+		IReadOnlyList<Player> containingList = player.Role == PlayerRole.ATTACKER ? this.Attackers : this.Defenders;
+		/* ``IReadOnlyList`1`` doesn't have an `IndexOf`, so... */
+		return new PlayerID(player.Role, containingList.WithIndex().Single(x => x.value == player).index);
 	}
 }
 
