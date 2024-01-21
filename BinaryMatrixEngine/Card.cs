@@ -37,35 +37,44 @@ public enum Value {
 	TRAP
 }
 
-[DebuggerDisplay("{DebugDisplay()}")]
-public struct Card : IEquatable<Card> {
+public readonly struct CardID : IEquatable<CardID> {
 	public readonly Axiom axiom;
 	public readonly Value value;
-	public bool revealed = false;
 
-	public Card(Axiom axiom, Value value) {
+	public CardID(Axiom axiom, Value value) {
 		if(axiom < Axiom.DATA || axiom > Axiom.CHOICE)
 			throw new ArgumentException("Invalid suit provided.", nameof(axiom));
 		if(value < Value.TWO || value > Value.TRAP)
 			throw new ArgumentException("Invalid value provided.", nameof(value));
+
 		this.axiom = axiom;
 		this.value = value;
 	}
 
-	public bool IsInvalid => this.value == 0 || this.axiom == 0;
+	public static CardID Unknown => default;
 
-	public bool Equals(Card other) => this.axiom == other.axiom && this.value == other.value;
-	override public bool Equals(object? obj) => obj is Card other && this.Equals(other);
-	override public int GetHashCode() => HashCode.Combine((int) this.axiom, (int) this.value);
+	public bool IsUnknown => this.axiom == 0 || this.value == 0;
 
-	public static bool operator ==(Card left, Card right) => left.Equals(right);
-	public static bool operator !=(Card left, Card right) => !left.Equals(right);
-
-	static Card() {
-		allCards = Enum.GetValues<Axiom>().SelectMany(_ => Enum.GetValues<Value>(), (axiom, value) => new Card(axiom, value)).ToImmutableList();
+	static CardID() {
+		allIDs = Enum.GetValues<Axiom>().SelectMany(_ => Enum.GetValues<Value>(), (axiom, value) => new CardID(axiom, value)).ToImmutableList();
 	}
 
-	public static readonly IReadOnlyList<Card> allCards;
+	public static readonly IReadOnlyList<CardID> allIDs;
+
+	override public string ToString() {
+		return this.IsUnknown ? "X" :
+				new string(new [] {
+					ValueToSymbol(this.value),
+					AxiomToSymbol(this.axiom)
+				})
+		;
+	}
+
+	public bool Equals(CardID other) => this.axiom == other.axiom && this.value == other.value;
+	override public bool Equals(object? obj) => obj is CardID other && this.Equals(other);
+	override public int GetHashCode() => HashCode.Combine((int) this.axiom, (int) this.value);
+	public static bool operator ==(CardID left, CardID right) => left.Equals(right);
+	public static bool operator !=(CardID left, CardID right) => !left.Equals(right);
 
 	public static Axiom? AxiomFromSymbol(char c) {
 		return c switch {
@@ -126,14 +135,42 @@ public struct Card : IEquatable<Card> {
 			Value.TRAP => '@'
 		};
 	}
+}
+
+[DebuggerDisplay("{DebugDisplay()}")]
+public struct Card : IEquatable<Card> {
+	public readonly CardID ID;
+	public bool revealed = false;
+
+	public readonly Axiom Axiom => this.ID.axiom;
+	public readonly Value Value => this.ID.value;
+
+	public Card(CardID id) {
+		this.ID = id;
+	}
+
+	public Card(Axiom axiom, Value value) {
+		this.ID = new CardID(axiom, value);
+	}
+
+	/* A particular card cannot ever have an unknown ID. */
+	public bool IsInvalid => this.ID.IsUnknown;
+
+	public bool Equals(Card other) => this.ID == other.ID;
+	override public bool Equals(object? obj) => obj is Card other && this.Equals(other);
+	override public int GetHashCode() => this.ID.GetHashCode();
+
+	public static bool operator ==(Card left, Card right) => left.Equals(right);
+	public static bool operator !=(Card left, Card right) => !left.Equals(right);
+
+	static Card() {
+		allCards = CardID.allIDs.Select(x => new Card(x)).ToImmutableList();
+	}
+
+	public static readonly IReadOnlyList<Card> allCards;
 
 	override public string ToString() {
-		if(this.value == 0 || this.axiom == 0)
-			return "(( DEFAULT CARD ))";
-		if(this.IsInvalid)
-			return "(( INVALID CARD ))";
-
-		return new string(new [] { ValueToSymbol(this.value), AxiomToSymbol(this.axiom) });
+		return this.ID + (this.revealed ? "u" : "");
 	}
 
 	public string DebugDisplay() {

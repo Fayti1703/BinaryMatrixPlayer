@@ -59,12 +59,12 @@ public readonly struct CardSpecification {
 
 	public bool Matches(Card card) {
 		if(this.value != null) {
-			if(this.value != card.value)
+			if(this.value != card.Value)
 				return false;
 		}
 
 		if(this.axiom != null) {
-			if(this.axiom != card.axiom)
+			if(this.axiom != card.Axiom)
 				return false;
 		}
 
