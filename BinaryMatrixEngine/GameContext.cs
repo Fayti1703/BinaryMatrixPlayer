@@ -98,7 +98,7 @@ public sealed class GameContext : IDisposable {
 				(Player player, ActionSet action) in
 				activePlayers.Select(x => (player: x, action: x.GetAndConsumeAction()))
 			) {
-				GameExecution.ExecutePlayerTurn(this, player, action, drawnDecks);
+				GameExecution.ExecutePlayerTurn(this, player, action, drawnDecks, out _);
 				if(this.Victor != null) break;
 			}
 		}
