@@ -57,7 +57,7 @@ public static class GameExecution {
 			case ActionType.DRAW: {
 				if(action.lane == ActionSet.LANE_A) {
 					if(player.Role == PlayerRole.ATTACKER) return OperationError.WRONG_ROLE;
-					bool drawOK = TryDraw(context, context.board[DA], player);
+					bool drawOK = TryDraw(context, context.board[DA], player, out _);
 					if(!drawOK) return OperationError.EMPTY_STACK;
 				} else {
 					Lane lane = context.board.GetLane(action.lane);
@@ -66,7 +66,7 @@ public static class GameExecution {
 						if(!drawnDecks.Add(lane.laneDeck)) return OperationError.DOUBLE_DRAW;
 					}
 
-					bool drawOK = TryDraw(context, lane.laneDeck, player);
+					bool drawOK = TryDraw(context, lane.laneDeck, player, out _);
 					if(!drawOK) {
 						if(player.Role == PlayerRole.DEFENDER) return OperationError.EMPTY_STACK;
 						context.SetVictor(PlayerRole.ATTACKER);
@@ -111,9 +111,9 @@ public static class GameExecution {
 					if(context.board[DA].cards.Count == 0 && context.board[XA].cards.Count == 0)
 						return OperationError.EMPTY_STACK;
 					context.board[XA].cards.Add(player.Hand.Take(result.Value.index)!.Value).revealed = true;
-					bool drawOK = TryDraw(context, context.board[DA], player);
+					bool drawOK = TryDraw(context, context.board[DA], player, out _);
 					Debug.Assert(drawOK);
-					drawOK = TryDraw(context, context.board[DA], player);
+					drawOK = TryDraw(context, context.board[DA], player, out _);
 					Debug.Assert(drawOK);
 				} else {
 					if(player.Role == PlayerRole.ATTACKER) return OperationError.WRONG_ROLE;
@@ -216,7 +216,7 @@ public static class GameExecution {
 		if(damage > 0) {
 			if(player.Role == PlayerRole.ATTACKER) {
 				while(damage > 0) {
-					if(!TryDraw(context, lane.laneDeck, player)) {
+					if(!TryDraw(context, lane.laneDeck, player, out _)) {
 						context.SetVictor(PlayerRole.ATTACKER);
 						break;
 					}
@@ -226,7 +226,7 @@ public static class GameExecution {
 				while(damage > 0) {
 					foreach(Player attacker in context.Attackers) {
 						if(damage == 0) break;
-						if(!TryDraw(context, lane.laneDeck, attacker)) {
+						if(!TryDraw(context, lane.laneDeck, attacker, out _)) {
 							context.SetVictor(PlayerRole.ATTACKER);
 							goto endLp;
 						}
@@ -279,10 +279,11 @@ public static class GameExecution {
 		return new Indexed<Card>(index.Value, player.Hand[index.Value]);
 	}
 
-	private static bool TryDraw(GameContext context, Cell stack, Player drawingPlayer) {
+	private static bool TryDraw(GameContext context, Cell stack, Player drawingPlayer, out CardID logCard) {
 		Debug.Assert(stack.name is >= L0 and <= L5 or DA);
 		if(stack.cards.Count == 0) {
 			Cell discard = context.board[stack.AssociatedDiscard!.Value];
+			logCard = default;
 			if(discard.cards.Count == 0) return false;
 			using CardList cards = FisherYatesShuffle(context.rng, discard.cards);
 			discard.cards.Clear();
@@ -291,6 +292,7 @@ public static class GameExecution {
 		}
 
 		Card drawn = stack.cards.TakeLast()!.Value;
+		logCard = drawn.revealed ? drawn.ID : CardID.Unknown;
 		drawn.revealed = false;
 		drawingPlayer.Hand.Add(drawn);
 		if(stack.name is >= L3 and <= L5) stack.cards.Last().Apply((ref Card x) => x.revealed = true);
