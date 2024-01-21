@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Fayti1703.CommonLib.Enumeration;
 
 namespace BinaryMatrix.Engine;
 
@@ -18,7 +19,7 @@ public static class NativeBinCmdParser {
 			case 'p':
 			case 'u':
 			case 'x': {
-				CardSpecification? card = ParseCard(input[1..], out int nextIndex);
+				NativeCardSpecification? card = ParseCard(input[1..], out int nextIndex);
 				if(card == null) return null;
 				int? lane = ParseLane(input[(1 + nextIndex)..]);
 				if(lane == null) return null;
@@ -44,7 +45,7 @@ public static class NativeBinCmdParser {
 		return value;
 	}
 
-	private static CardSpecification? ParseCard(string input, out int nextIndex) {
+	private static NativeCardSpecification? ParseCard(string input, out int nextIndex) {
 		Value? value = Card.ValueFromSymbol(input[0]);
 		if(value == null) {
 			nextIndex = 0;
@@ -53,6 +54,35 @@ public static class NativeBinCmdParser {
 
 		Axiom? axiom = Card.AxiomFromSymbol(input[1]);
 		nextIndex = axiom == null ? 1 : 2;
-		return new CardSpecification(value, axiom);
+		return new NativeCardSpecification(value, axiom);
+	}
+}
+
+public readonly struct NativeCardSpecification : CardSpecification {
+	public readonly Axiom? axiom;
+	public readonly Value? value;
+
+	public NativeCardSpecification(Value? value, Axiom? axiom) {
+		this.axiom = axiom;
+		this.value = value;
+	}
+
+	public int? ResolveForPlayer(Player player) {
+		NativeCardSpecification self = this;
+		return player.Hand.WithIndex().FirstOrNull(x => self.Matches(x.value))?.index;
+	}
+
+	public bool Matches(Card card) {
+		if(this.value != null) {
+			if(this.value != card.value)
+				return false;
+		}
+
+		if(this.axiom != null) {
+			if(this.axiom != card.axiom)
+				return false;
+		}
+
+		return true;
 	}
 }

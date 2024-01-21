@@ -17,7 +17,7 @@ public enum ActionType {
 public struct ActionSet {
 	public readonly ActionType type;
 	public readonly int lane;
-	public readonly CardSpecification card;
+	public readonly CardSpecification? card;
 
 	/* "a" Pseudo-Lane */
 	public const int LANE_A = 6;
@@ -48,28 +48,8 @@ public struct ActionSet {
 	}
 }
 
-public readonly struct CardSpecification {
-	public readonly Axiom? axiom;
-	public readonly Value? value;
-
-	public CardSpecification(Value? value, Axiom? axiom) {
-		this.axiom = axiom;
-		this.value = value;
-	}
-
-	public bool Matches(Card card) {
-		if(this.value != null) {
-			if(this.value != card.value)
-				return false;
-		}
-
-		if(this.axiom != null) {
-			if(this.axiom != card.axiom)
-				return false;
-		}
-
-		return true;
-	}
+public interface CardSpecification {
+	public int? ResolveForPlayer(Player player);
 }
 
 public interface Player : IDisposable {

@@ -273,7 +273,10 @@ public static class GameExecution {
 	}
 
 	private static Indexed<Card>? ResolveCard(CardSpecification cardSpec, Player player) {
-		return player.Hand.WithIndex().FirstOrNull(x => cardSpec.Matches(x.value));
+		int? index = cardSpec.ResolveForPlayer(player);
+		if(index == null) return null;
+		/* TODO?: Catch some possible errors here, point the finger at CardSpecification? */
+		return new Indexed<Card>(index.Value, player.Hand[index.Value]);
 	}
 
 	private static bool TryDraw(GameContext context, Cell stack, Player drawingPlayer) {
