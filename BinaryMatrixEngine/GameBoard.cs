@@ -59,17 +59,20 @@ public sealed class Cell : IDisposable {
 
 /* Don't try to use `default(Lane)`. */
 public struct Lane {
+	public readonly int laneNo;
 	public readonly Cell attackerStack;
 	public readonly Cell defenderStack;
 	public readonly Cell laneDeck;
 	public readonly Cell discardPile;
 
 	internal Lane(
+		int laneNo,
 		Cell attackerStack,
 		Cell defenderStack,
 		Cell laneDeck,
 		Cell discardPile
 	) {
+		this.laneNo = laneNo;
 		this.attackerStack = attackerStack;
 		this.defenderStack = defenderStack;
 		this.laneDeck = laneDeck;
@@ -96,7 +99,7 @@ public sealed class GameBoard : IDisposable {
 		CellName l = L0 + laneNo;
 		CellName x = X0 + laneNo;
 
-		return new Lane(this[a], this[d], this[l], this[x]);
+		return new Lane(laneNo, this[a], this[d], this[l], this[x]);
 	}
 
 	public Cell this[CellName name] => this.GetCell(name);
