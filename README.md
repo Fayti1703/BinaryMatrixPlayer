@@ -1,6 +1,6 @@
 # Binary Matrix Player
 
-A work-in-progress ASP.NET web application for playing [binary matrix (aka "binmat")](https://github.com/DrizzlyBear/binmat_rules),
+A work-in-progress ASP.NET web application for playing [binary matrix (aka "BINMAT")](https://github.com/DrizzlyBear/binmat_rules),
 an adversarial strategic card game.
 
 ## Project Structure
