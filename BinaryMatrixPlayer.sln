@@ -10,7 +10,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinaryMatrixPlayer", "Binar
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinaryMatrixEngine", "BinaryMatrixEngine\BinaryMatrixEngine.csproj", "{0293F48A-9458-4DE2-8E38-D6B99230D68B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinaryMatrixEngineTest", "BinaryMatrixEngineTest\BinaryMatrixEngineTest.csproj", "{F7F32029-7084-4294-848F-2658A18B701F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinaryMatrixEngine.Tests", "BinaryMatrixEngine.Tests\BinaryMatrixEngine.Tests.csproj", "{F7F32029-7084-4294-848F-2658A18B701F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinaryMatrixEngineAccessor", "BinaryMatrixEngineAccessor\BinaryMatrixEngineAccessor.csproj", "{9607EAB8-E726-49CA-B565-CA60FD683165}"
 EndProject
