@@ -46,13 +46,17 @@ public static class NativeBinCmdParser {
 	}
 
 	private static NativeCardSpecification? ParseCard(string input, out int nextIndex) {
-		Value? value = CardID.ValueFromSymbol(input[0]);
+		Value? value = null;
+		if(input.Length > 0)
+			value = CardID.ValueFromSymbol(input[0]);
 		if(value == null) {
 			nextIndex = 0;
 			return null;
 		}
 
-		Axiom? axiom = CardID.AxiomFromSymbol(input[1]);
+		Axiom? axiom = null;
+		if(input.Length > 1)
+			axiom = CardID.AxiomFromSymbol(input[1]);
 		nextIndex = axiom == null ? 1 : 2;
 		return new NativeCardSpecification(value, axiom);
 	}
