@@ -117,9 +117,9 @@ public sealed class CardList : IEnumerable<Card>, IDisposable {
 		if(requiredLength < this.cards.Length)
 			return;
 
-		int newLength;
+		int newLength = this.cards.Length;
 		do {
-			newLength = this.cards.Length * 2;
+			newLength *= 2;
 			if(newLength == 0) newLength = 1;
 		} while(requiredLength > newLength);
 
