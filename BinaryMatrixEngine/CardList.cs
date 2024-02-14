@@ -168,6 +168,8 @@ public sealed class CardList : IEnumerable<Card>, IDisposable {
 	}
 
 	public Card? Take(int index) {
+		if(index < 0 || index >= this.Count)
+			return null;
 		Card ret = this.cards[index];
 		this.Count--;
 		if(index < this.Count)
