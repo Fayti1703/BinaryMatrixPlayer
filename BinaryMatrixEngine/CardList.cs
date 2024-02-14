@@ -20,7 +20,7 @@ namespace BinaryMatrix.Engine;
  */
 public sealed class CardList : IEnumerable<Card>, IDisposable {
 
-	private const bool FAIL_FAST_INVALID = true;
+	internal static bool FAIL_FAST_INVALID = true;
 
 	private Card[] cards = Array.Empty<Card>();
 	public int Count { get; private set; } = 0;
