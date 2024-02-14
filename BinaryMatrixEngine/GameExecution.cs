@@ -56,7 +56,7 @@ public static class GameExecution {
 				return OperationError.NO_ACTION;
 			case ActionType.DRAW: {
 				if(action.lane == ActionSet.LANE_A) {
-					if(player.Role == PlayerRole.ATTACKER) return OperationError.WRONG_ROLE;
+					if(player.Role == PlayerRole.DEFENDER) return OperationError.WRONG_ROLE;
 					bool drawOK = TryDraw(context, context.board[DA], player);
 					if(!drawOK) return OperationError.EMPTY_STACK;
 				} else {
