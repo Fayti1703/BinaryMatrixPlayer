@@ -53,6 +53,18 @@ public sealed class CardList : IEnumerable<Card>, IDisposable {
 		}
 	}
 
+	public CardList(IList<Card> cards) {
+		this.cards = listPool.Rent(cards.Count);
+		cards.CopyTo(this.cards, 0);
+		this.Count = this.cards.Length;
+		if(FAIL_FAST_INVALID) {
+			foreach(ref Card card in this) {
+				if(card.IsInvalid)
+					throw new ArgumentException("The provided list contains an invalid card!", nameof(cards));
+			}
+		}
+	}
+
 	public CardList(CardList cards) {
 		this.cards = listPool.Rent(cards.Count);
 		this.AddAll(cards);
