@@ -206,7 +206,7 @@ public static class GameExecution {
 		results = log.FinishOptional();
 	}
 
-	private static void ResolveCombat(GameContext context, Lane lane, Player player, out CombatLog combatLog) {
+	internal static void ResolveCombat(GameContext context, Lane lane, Player player, out CombatLog combatLog) {
 		CombatLogBuilder log = new() {
 			inLane = lane.laneNo,
 			initialAS = lane.attackerStack.cards.Select(x => x.ID).ToImmutableList(),
