@@ -156,21 +156,21 @@ public struct GameHooks {
 
 	static GameHooks() {
 		Default = new GameHooks {
-			PreGamePrep = DefaultPreGamePrep,
-			PreTurn = DefaultPreTurn,
-			PostTurn = DefaultPostTurn
+			PreGamePrep = StandardPreGamePrep,
+			PreTurn = NoopPreTurn,
+			PostTurn = AsyncPostTurn
 		};
 	}
 
-	private static void DefaultPreTurn(GameContext context) { /* do nothing */ }
+	public static void NoopPreTurn(GameContext context) { /* do nothing */ }
 
-	private static void DefaultPostTurn(GameContext context) {
+	public static void AsyncPostTurn(GameContext context) {
 		if(context is { TurnCounter: 109 }) {
 			context.SetVictor(PlayerRole.DEFENDER);
 		}
 	}
 
-	private static void DefaultPreGamePrep(GameContext context) {
+	public static void StandardPreGamePrep(GameContext context) {
 		using CardList cards = GameExecution.FisherYatesShuffle(context.rng, Card.allCards);
 		int j = 0;
 		for(int i = 0; i < 13; i++) {
