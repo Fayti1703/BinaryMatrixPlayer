@@ -23,7 +23,7 @@ public static class GameExecution {
 	public static void ExecutePlayerTurn(GameContext context, Player player, ActionSet action, HashSet<Cell> drawnDecks, out ActionLog log) {
 		OperationError error = ExecutePlayerAction(context, player, action, drawnDecks, out log);
 		if(error != OperationError.NONE) {
-			player.ReportOperationError(error);
+			player.actor.ReportOperationError(error);
 			player.InvalidOperationCount++;
 			if(player.InvalidOperationCount == 2) {
 				SuccessiveInvalidOperationSteps(context, player);

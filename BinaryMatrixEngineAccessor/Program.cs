@@ -5,8 +5,8 @@ namespace BinaryMatrix.Accessor;
 public static class Program {
 	public static void Main() {
 
-		ConsolePlayer attacker = new(PlayerRole.ATTACKER);
-		ConsolePlayer defender = new(PlayerRole.DEFENDER);
+		Player attacker = new(new PlayerID(PlayerRole.ATTACKER, 0), new ConsolePlayerActor());
+		Player defender = new(new PlayerID(PlayerRole.DEFENDER, 0), new ConsolePlayerActor());
 
 		GameContext context = new(new[] { attacker, defender }, new RandomRNG(new Random(1024)), GameHooks.Default);
 

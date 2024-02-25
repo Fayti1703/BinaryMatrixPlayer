@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using Fayti1703.CommonLib.Enumeration;
 using JetBrains.Annotations;
 
 namespace BinaryMatrix.Engine;
@@ -118,10 +117,9 @@ public sealed class GameContext : IDisposable {
 		this.board.Dispose();
 	}
 
+	[Obsolete("Access the player's ID property directly")]
 	public PlayerID GetPlayerID(Player player) {
-		IReadOnlyList<Player> containingList = player.Role == PlayerRole.ATTACKER ? this.Attackers : this.Defenders;
-		/* ``IReadOnlyList`1`` doesn't have an `IndexOf`, so... */
-		return new PlayerID(player.Role, containingList.WithIndex().Single(x => x.value == player).index);
+		return player.ID;
 	}
 }
 
@@ -141,6 +139,7 @@ public class RandomRNG : RNG {
 
 [PublicAPI]
 public struct GameHooks {
+	[Obsolete("Create your own GameHooks instead.")]
 	public static readonly GameHooks Default;
 
 	public delegate void PreGamePrepType(GameContext context);
@@ -192,6 +191,14 @@ public struct GameHooks {
 		}
 	}
 
-	private static IEnumerable<(Player player, ActionSet action)> LegacyGetPlayerActions(GameContext context, IEnumerable<Player> activePlayers) =>
-		activePlayers.Select(player => (player, player.GetAndConsumeAction()));
+	[Obsolete("Implement your own `GetActions` hook instead. This method may disappear in future.")]
+	public static IEnumerable<(Player player, ActionSet action)> LegacyGetPlayerActions(GameContext context, IEnumerable<Player> activePlayers) {
+		foreach(Player player in activePlayers) {
+			if(player.actor is ActionablePlayerActor actionableActor) {
+				yield return (player, actionableActor.GetAndConsumeAction());
+			} else {
+				throw new Exception("Cannot handle an unactionable actor via LegacyGetPlayerActions!");
+			}
+		}
+	}
 }
