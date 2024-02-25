@@ -150,9 +150,9 @@ public struct GameHooks {
 	public delegate void PreTurnType(GameContext context);
 	public delegate void PostTurnType(GameContext context);
 
-	public PreGamePrepType PreGamePrep;
-	public PreTurnType PreTurn;
-	public PostTurnType PostTurn;
+	public required PreGamePrepType PreGamePrep;
+	public required PreTurnType PreTurn;
+	public required PostTurnType PostTurn;
 
 	static GameHooks() {
 		Default = new GameHooks {
