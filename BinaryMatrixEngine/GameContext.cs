@@ -95,7 +95,7 @@ public sealed class GameContext : IDisposable {
 			HashSet<Cell> drawnDecks = new();
 			foreach(
 				(Player player, ActionSet action) in
-				activePlayers.Select(x => (player: x, action: x.GetAndConsumeAction()))
+				this.hooks.GetActions(this, activePlayers)
 			) {
 				GameExecution.ExecutePlayerTurn(this, player, action, drawnDecks, out ActionLog actionLog);
 				actions.Add(actionLog);
@@ -149,16 +149,28 @@ public struct GameHooks {
 	public delegate void PreGamePrepType(GameContext context);
 	public delegate void PreTurnType(GameContext context);
 	public delegate void PostTurnType(GameContext context);
+	public delegate IEnumerable<(Player player, ActionSet action)> GetActionsType(GameContext context, IEnumerable<Player> activePlayers);
 
 	public required PreGamePrepType PreGamePrep;
 	public required PreTurnType PreTurn;
 	public required PostTurnType PostTurn;
+	public required GetActionsType GetActions;
+
+	public static GameHooks MakeAsyncRules(GetActionsType getActions) {
+		return new GameHooks {
+			PreGamePrep = StandardPreGamePrep,
+			PreTurn = NoopPreTurn,
+			PostTurn = AsyncPostTurn,
+			GetActions = getActions
+		};
+	}
 
 	static GameHooks() {
 		Default = new GameHooks {
 			PreGamePrep = StandardPreGamePrep,
 			PreTurn = NoopPreTurn,
-			PostTurn = AsyncPostTurn
+			PostTurn = AsyncPostTurn,
+			GetActions = LegacyGetPlayerActions
 		};
 	}
 
@@ -182,4 +194,7 @@ public struct GameHooks {
 			context.board[CellName.L5].cards.Add(cards[j++]);
 		}
 	}
+
+	private static IEnumerable<(Player player, ActionSet action)> LegacyGetPlayerActions(GameContext context, IEnumerable<Player> activePlayers) =>
+		activePlayers.Select(player => (player, player.GetAndConsumeAction()));
 }
