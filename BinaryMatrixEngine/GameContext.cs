@@ -4,19 +4,13 @@ using JetBrains.Annotations;
 
 namespace BinaryMatrix.Engine;
 
-public enum GameType {
-	ASYNC
-}
-
 public struct GameState {
-	public readonly GameType gameType;
 	public readonly int turnCounter;
 	public readonly GameBoard board;
 	public readonly PlayerRole? victor;
 	public readonly IReadOnlyList<TurnLog> binlog;
 
-	public GameState(GameType type, int turnCounter, GameBoard board, PlayerRole? victor, IReadOnlyList<TurnLog> binlog) {
-		this.gameType = type;
+	public GameState(int turnCounter, GameBoard board, PlayerRole? victor, IReadOnlyList<TurnLog> binlog) {
 		this.turnCounter = turnCounter;
 		this.board = board;
 		this.victor = victor;
@@ -26,7 +20,6 @@ public struct GameState {
 
 [PublicAPI]
 public sealed class GameContext : IDisposable {
-	public readonly GameType gameType;
 	public int TurnCounter { get; private set; }
 	public IReadOnlyList<Player> Attackers { get; }
 	public IReadOnlyList<Player> Defenders { get; }
@@ -42,7 +35,7 @@ public sealed class GameContext : IDisposable {
 
 	public PlayerRole? Victor { get; private set; }
 
-	private GameContext(IEnumerable<Player> players, RNG rng, GameHooks? hooks) {
+	private GameContext(bool _, IEnumerable<Player> players, RNG rng, GameHooks? hooks) {
 		/* fallbacks */
 		this.Attackers = ImmutableList<Player>.Empty;
 		this.Defenders = ImmutableList<Player>.Empty;
@@ -60,14 +53,12 @@ public sealed class GameContext : IDisposable {
 		this.hooks = hooks ?? GameHooks.Default;
 	}
 
-	public GameContext(GameType gameType, IEnumerable<Player> players, RNG rng, GameHooks? hooks = null) : this(players, rng, hooks) {
-		this.gameType = gameType;
+	public GameContext(IEnumerable<Player> players, RNG rng, GameHooks? hooks = null) : this(true, players, rng, hooks) {
 		this.board = new GameBoard();
 		this.binlog = new List<TurnLog>();
 	}
 
-	public GameContext(GameState state, IEnumerable<Player> players, RNG rng, GameHooks? hooks = null) : this(players, rng, hooks) {
-		this.gameType = state.gameType;
+	public GameContext(GameState state, IEnumerable<Player> players, RNG rng, GameHooks? hooks = null) : this(true, players, rng, hooks) {
 		this.TurnCounter = state.turnCounter;
 		this.Victor = state.victor;
 		this.board = state.board.Copy();
@@ -90,7 +81,6 @@ public sealed class GameContext : IDisposable {
 
 	public GameState SaveState() {
 		return new GameState(
-			this.gameType,
 			this.TurnCounter,
 			this.board.Copy(),
 			this.Victor,
@@ -176,7 +166,7 @@ public struct GameHooks {
 	private static void DefaultPreTurn(GameContext context) { /* do nothing */ }
 
 	private static void DefaultPostTurn(GameContext context) {
-		if(context is { gameType: GameType.ASYNC, TurnCounter: 109 }) {
+		if(context is { TurnCounter: 109 }) {
 			context.SetVictor(PlayerRole.DEFENDER);
 		}
 	}
