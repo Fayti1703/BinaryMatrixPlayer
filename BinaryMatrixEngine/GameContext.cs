@@ -93,10 +93,7 @@ public sealed class GameContext : IDisposable {
 		{
 			List<ActionLog> actions = new();
 			HashSet<Cell> drawnDecks = new();
-			foreach(
-				(Player player, ActionSet action) in
-				this.hooks.GetActions(this, activePlayers)
-			) {
+			foreach((Player player, ActionSet action) in this.hooks.GetActions(this, activePlayers)) {
 				GameExecution.ExecutePlayerTurn(this, player, action, drawnDecks, out ActionLog actionLog);
 				actions.Add(actionLog);
 				if(this.Victor != null) break;
