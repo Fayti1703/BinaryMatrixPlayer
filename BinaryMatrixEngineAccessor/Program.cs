@@ -8,7 +8,7 @@ public static class Program {
 		ConsolePlayer attacker = new(PlayerRole.ATTACKER);
 		ConsolePlayer defender = new(PlayerRole.DEFENDER);
 
-		GameContext context = new(new[] { attacker, defender }, new RandomRNG(new Random(1024)));
+		GameContext context = new(new[] { attacker, defender }, new RandomRNG(new Random(1024)), GameHooks.Default);
 
 		context.Setup();
 

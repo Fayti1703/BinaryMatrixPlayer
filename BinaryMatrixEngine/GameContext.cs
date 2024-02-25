@@ -55,10 +55,10 @@ public sealed class GameContext : IDisposable {
 		this.binlog = binlog;
 	}
 
-	public GameContext(IEnumerable<Player> players, RNG rng, GameHooks? hooks = null)
+	public GameContext(IEnumerable<Player> players, RNG rng, GameHooks hooks)
 		: this(players, rng, hooks, new GameBoard(), new List<TurnLog>()) { }
 
-	public GameContext(GameState state, IEnumerable<Player> players, RNG rng, GameHooks? hooks = null)
+	public GameContext(GameState state, IEnumerable<Player> players, RNG rng, GameHooks hooks)
 		: this(players, rng, hooks, state.board.Copy(), new List<TurnLog>(state.binlog)) {
 		this.TurnCounter = state.turnCounter;
 		this.Victor = state.victor;
