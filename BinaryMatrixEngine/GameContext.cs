@@ -197,7 +197,7 @@ public struct GameHooks {
 			if(player.actor is ActionablePlayerActor actionableActor) {
 				yield return (player, actionableActor.GetAndConsumeAction());
 			} else {
-				throw new Exception("Cannot handle an unactionable actor via LegacyGetPlayerActions!");
+				throw new Exception("Cannot handle an non-ActionablePlayerActor via LegacyGetPlayerActions!");
 			}
 		}
 	}
