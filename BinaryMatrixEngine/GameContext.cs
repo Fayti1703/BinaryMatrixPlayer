@@ -35,7 +35,7 @@ public sealed class GameContext : IDisposable {
 
 	public PlayerRole? Victor { get; private set; }
 
-	private GameContext(bool _, IEnumerable<Player> players, RNG rng, GameHooks? hooks) {
+	private GameContext(IEnumerable<Player> players, RNG rng, GameHooks? hooks, GameBoard board, List<TurnLog> binlog) {
 		/* fallbacks */
 		this.Attackers = ImmutableList<Player>.Empty;
 		this.Defenders = ImmutableList<Player>.Empty;
@@ -51,18 +51,17 @@ public sealed class GameContext : IDisposable {
 		}
 		this.rng = rng;
 		this.hooks = hooks ?? GameHooks.Default;
+		this.board = board;
+		this.binlog = binlog;
 	}
 
-	public GameContext(IEnumerable<Player> players, RNG rng, GameHooks? hooks = null) : this(true, players, rng, hooks) {
-		this.board = new GameBoard();
-		this.binlog = new List<TurnLog>();
-	}
+	public GameContext(IEnumerable<Player> players, RNG rng, GameHooks? hooks = null)
+		: this(players, rng, hooks, new GameBoard(), new List<TurnLog>()) { }
 
-	public GameContext(GameState state, IEnumerable<Player> players, RNG rng, GameHooks? hooks = null) : this(true, players, rng, hooks) {
+	public GameContext(GameState state, IEnumerable<Player> players, RNG rng, GameHooks? hooks = null)
+		: this(players, rng, hooks, state.board.Copy(), new List<TurnLog>(state.binlog)) {
 		this.TurnCounter = state.turnCounter;
 		this.Victor = state.victor;
-		this.board = state.board.Copy();
-		this.binlog = new List<TurnLog>(state.binlog);
 	}
 
 	public void Setup() {
