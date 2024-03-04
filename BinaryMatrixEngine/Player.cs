@@ -71,4 +71,8 @@ public readonly struct PlayerID {
 		this.role = role;
 		this.index = index;
 	}
+
+	override public string ToString() {
+		return (this.role == PlayerRole.ATTACKER ? 'a' : 'd') + this.index.ToString();
+	}
 }
