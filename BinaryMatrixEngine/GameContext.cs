@@ -3,7 +3,7 @@ using JetBrains.Annotations;
 
 namespace BinaryMatrix.Engine;
 
-public struct GameState {
+public readonly struct GameState {
 	public readonly int turnCounter;
 	public readonly GameBoard board;
 	public readonly IReadOnlyList<PlayerData> players;
