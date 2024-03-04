@@ -6,14 +6,31 @@ namespace BinaryMatrix.Engine;
 public struct GameState {
 	public readonly int turnCounter;
 	public readonly GameBoard board;
+	public readonly IReadOnlyList<PlayerData> players;
 	public readonly PlayerRole? victor;
 	public readonly IReadOnlyList<TurnLog> binlog;
 
-	public GameState(int turnCounter, GameBoard board, PlayerRole? victor, IReadOnlyList<TurnLog> binlog) {
+	public GameState(
+		int turnCounter,
+		IReadOnlyList<PlayerData> players,
+		GameBoard board,
+		PlayerRole? victor,
+		IReadOnlyList<TurnLog> binlog
+	) {
 		this.turnCounter = turnCounter;
+		this.players = players;
 		this.board = board;
 		this.victor = victor;
 		this.binlog = binlog;
+	}
+
+	internal IEnumerable<Player> CreatePlayers(IReadOnlyDictionary<PlayerID, PlayerActor> actors) {
+		foreach(PlayerData playerData in this.players) {
+			if(!actors.TryGetValue(playerData.id, out PlayerActor? actor)) {
+				throw new ArgumentException($"Dictionary does not have actor for player '{playerData.id}'", nameof(actors));
+			}
+			yield return new Player(playerData, actor);
+		}
 	}
 }
 
@@ -57,8 +74,8 @@ public sealed class GameContext : IDisposable {
 	public GameContext(IEnumerable<Player> players, RNG rng, GameHooks hooks)
 		: this(players, rng, hooks, new GameBoard(), new List<TurnLog>()) { }
 
-	public GameContext(GameState state, IEnumerable<Player> players, RNG rng, GameHooks hooks)
-		: this(players, rng, hooks, state.board.Copy(), new List<TurnLog>(state.binlog)) {
+	public GameContext(GameState state, IReadOnlyDictionary<PlayerID, PlayerActor> actors, RNG rng, GameHooks hooks)
+		: this(state.CreatePlayers(actors), rng, hooks, state.board.Copy(), new List<TurnLog>(state.binlog)) {
 		this.TurnCounter = state.turnCounter;
 		this.Victor = state.victor;
 	}
@@ -80,6 +97,7 @@ public sealed class GameContext : IDisposable {
 	public GameState SaveState() {
 		return new GameState(
 			this.TurnCounter,
+			this.Players.Select(x => x.data.Copy()).ToImmutableList(),
 			this.board.Copy(),
 			this.Victor,
 			this.binlog.ToImmutableList()
