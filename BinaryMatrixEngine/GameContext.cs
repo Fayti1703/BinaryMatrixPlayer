@@ -116,11 +116,6 @@ public sealed class GameContext : IDisposable {
 	public void Dispose() {
 		this.board.Dispose();
 	}
-
-	[Obsolete("Access the player's ID property directly")]
-	public PlayerID GetPlayerID(Player player) {
-		return player.ID;
-	}
 }
 
 public interface RNG {
