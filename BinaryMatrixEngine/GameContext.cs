@@ -5,7 +5,7 @@ namespace BinaryMatrix.Engine;
 
 public readonly struct GameState {
 	public readonly int turnCounter;
-	public readonly GameBoard board;
+	public readonly IReadOnlyList<IEnumerable<Card>> board;
 	public readonly IReadOnlyList<PlayerData> players;
 	public readonly PlayerRole? victor;
 	public readonly IReadOnlyList<TurnLog> binlog;
@@ -13,7 +13,7 @@ public readonly struct GameState {
 	public GameState(
 		int turnCounter,
 		IReadOnlyList<PlayerData> players,
-		GameBoard board,
+		IReadOnlyList<IEnumerable<Card>> board,
 		PlayerRole? victor,
 		IReadOnlyList<TurnLog> binlog
 	) {
@@ -75,7 +75,7 @@ public sealed class GameContext : IDisposable {
 		: this(players, rng, hooks, new GameBoard(), new List<TurnLog>()) { }
 
 	public GameContext(GameState state, IReadOnlyDictionary<PlayerID, PlayerActor> actors, RNG rng, GameHooks hooks)
-		: this(state.CreatePlayers(actors), rng, hooks, state.board.Copy(), new List<TurnLog>(state.binlog)) {
+		: this(state.CreatePlayers(actors), rng, hooks, new GameBoard(state.board), new List<TurnLog>(state.binlog)) {
 		this.TurnCounter = state.turnCounter;
 		this.Victor = state.victor;
 	}
@@ -98,7 +98,7 @@ public sealed class GameContext : IDisposable {
 		return new GameState(
 			this.TurnCounter,
 			this.Players.Select(x => x.data.Copy()).ToImmutableList(),
-			this.board.Copy(),
+			this.board.GetStacks(),
 			this.Victor,
 			this.binlog.ToImmutableList()
 		);
