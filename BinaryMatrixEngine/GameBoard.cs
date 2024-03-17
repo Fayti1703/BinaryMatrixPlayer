@@ -27,6 +27,11 @@ public sealed class Cell : IDisposable {
 		});
 	}
 
+	internal Cell(CellName name, IEnumerable<Card> cards) {
+		this.name = name;
+		this.cards = new CardList(cards);
+	}
+
 	public bool Revealed {
 		get => this.name switch {
 			>= X0 and <= X5 => true,
@@ -88,6 +93,11 @@ public sealed class GameBoard : IDisposable {
 		this.cells = Enum.GetValues<CellName>().Select(x => new Cell(x)).ToImmutableList();
 	}
 
+	public GameBoard(IReadOnlyCollection<IEnumerable<Card>> stacks) {
+		if(stacks.Count != Enum.GetValues<CellName>().Length) throw new ArgumentException("Invalid number of stacks", nameof(stacks));
+		this.cells = stacks.Select((x, i) => new Cell((CellName) i, x)).ToImmutableList();
+	}
+
 	public Cell GetCell(CellName name) {
 		return this.cells[(int) name];
 	}
@@ -115,6 +125,8 @@ public sealed class GameBoard : IDisposable {
 
 		return newBoard;
 	}
+
+	public IReadOnlyList<IEnumerable<Card>> GetStacks() => this.cells.Select(x => x.cards).ToImmutableList();
 
 	public void Dispose() {
 		foreach(Cell cell in this.cells) {
