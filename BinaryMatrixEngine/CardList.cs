@@ -34,6 +34,12 @@ public sealed class CardList : IEnumerable<Card>, IDisposable {
 		this.cards = listPool.Rent(initialCapacity);
 	}
 
+	private static (Card[] storage, int count) CreateListFromCollection(ICollection<Card> cardList) {
+		Card[] storage = listPool.Rent(cardList.Count);
+		cardList.CopyTo(storage, 0);
+		return (storage, cardList.Count);
+	}
+
 	public CardList(IEnumerable<Card> cards) {
 		if(cards is CardList list) {
 			this.cards = listPool.Rent(list.Count);
@@ -41,10 +47,7 @@ public sealed class CardList : IEnumerable<Card>, IDisposable {
 			return;
 		}
 
-		Card[] theCards = cards.ToArray();
-		this.cards = listPool.Rent(theCards.Length);
-		Array.Copy(theCards, this.cards, theCards.Length);
-		this.Count = theCards.Length;
+		(this.cards, this.Count) = CreateListFromCollection(cards as ICollection<Card> ?? cards.ToArray());
 		if(FAIL_FAST_INVALID) {
 			foreach(ref Card card in this) {
 				if(card.IsInvalid)
@@ -54,9 +57,7 @@ public sealed class CardList : IEnumerable<Card>, IDisposable {
 	}
 
 	public CardList(IList<Card> cards) {
-		this.cards = listPool.Rent(cards.Count);
-		cards.CopyTo(this.cards, 0);
-		this.Count = this.cards.Length;
+		(this.cards, this.Count) = CreateListFromCollection(cards);
 		if(FAIL_FAST_INVALID) {
 			foreach(ref Card card in this) {
 				if(card.IsInvalid)
