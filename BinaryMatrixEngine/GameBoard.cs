@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Fayti1703.CommonLib.Enumeration;
 using JetBrains.Annotations;
 
@@ -84,7 +85,7 @@ public sealed class GameBoard : IDisposable {
 	private readonly IReadOnlyList<Cell> cells;
 
 	public GameBoard() {
-		this.cells = Enum.GetValues<CellName>().Select(x => new Cell(x)).ToList();
+		this.cells = Enum.GetValues<CellName>().Select(x => new Cell(x)).ToImmutableList();
 	}
 
 	public Cell GetCell(CellName name) {
