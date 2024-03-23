@@ -1,20 +1,36 @@
 using System.Collections.Immutable;
-using Fayti1703.CommonLib.Enumeration;
 using JetBrains.Annotations;
 
 namespace BinaryMatrix.Engine;
 
-public struct GameState {
+public readonly struct GameState {
 	public readonly int turnCounter;
 	public readonly GameBoard board;
+	public readonly IReadOnlyList<PlayerData> players;
 	public readonly PlayerRole? victor;
 	public readonly IReadOnlyList<TurnLog> binlog;
 
-	public GameState(int turnCounter, GameBoard board, PlayerRole? victor, IReadOnlyList<TurnLog> binlog) {
+	public GameState(
+		int turnCounter,
+		IReadOnlyList<PlayerData> players,
+		GameBoard board,
+		PlayerRole? victor,
+		IReadOnlyList<TurnLog> binlog
+	) {
 		this.turnCounter = turnCounter;
+		this.players = players;
 		this.board = board;
 		this.victor = victor;
 		this.binlog = binlog;
+	}
+
+	internal IEnumerable<Player> CreatePlayers(IReadOnlyDictionary<PlayerID, PlayerActor> actors) {
+		foreach(PlayerData playerData in this.players) {
+			if(!actors.TryGetValue(playerData.id, out PlayerActor? actor)) {
+				throw new ArgumentException($"Dictionary does not have actor for player '{playerData.id}'", nameof(actors));
+			}
+			yield return new Player(playerData, actor);
+		}
 	}
 }
 
@@ -55,11 +71,11 @@ public sealed class GameContext : IDisposable {
 		this.binlog = binlog;
 	}
 
-	public GameContext(IEnumerable<Player> players, RNG rng, GameHooks? hooks = null)
+	public GameContext(IEnumerable<Player> players, RNG rng, GameHooks hooks)
 		: this(players, rng, hooks, new GameBoard(), new List<TurnLog>()) { }
 
-	public GameContext(GameState state, IEnumerable<Player> players, RNG rng, GameHooks? hooks = null)
-		: this(players, rng, hooks, state.board.Copy(), new List<TurnLog>(state.binlog)) {
+	public GameContext(GameState state, IReadOnlyDictionary<PlayerID, PlayerActor> actors, RNG rng, GameHooks hooks)
+		: this(state.CreatePlayers(actors), rng, hooks, state.board.Copy(), new List<TurnLog>(state.binlog)) {
 		this.TurnCounter = state.turnCounter;
 		this.Victor = state.victor;
 	}
@@ -81,6 +97,7 @@ public sealed class GameContext : IDisposable {
 	public GameState SaveState() {
 		return new GameState(
 			this.TurnCounter,
+			this.Players.Select(x => x.data.Copy()).ToImmutableList(),
 			this.board.Copy(),
 			this.Victor,
 			this.binlog.ToImmutableList()
@@ -93,10 +110,7 @@ public sealed class GameContext : IDisposable {
 		{
 			List<ActionLog> actions = new();
 			HashSet<Cell> drawnDecks = new();
-			foreach(
-				(Player player, ActionSet action) in
-				activePlayers.Select(x => (player: x, action: x.GetAndConsumeAction()))
-			) {
+			foreach((Player player, ActionSet action) in this.hooks.GetActions(this, activePlayers)) {
 				GameExecution.ExecutePlayerTurn(this, player, action, drawnDecks, out ActionLog actionLog);
 				actions.Add(actionLog);
 				if(this.Victor != null) break;
@@ -120,12 +134,6 @@ public sealed class GameContext : IDisposable {
 	public void Dispose() {
 		this.board.Dispose();
 	}
-
-	public PlayerID GetPlayerID(Player player) {
-		IReadOnlyList<Player> containingList = player.Role == PlayerRole.ATTACKER ? this.Attackers : this.Defenders;
-		/* ``IReadOnlyList`1`` doesn't have an `IndexOf`, so... */
-		return new PlayerID(player.Role, containingList.WithIndex().Single(x => x.value == player).index);
-	}
 }
 
 public interface RNG {
@@ -144,33 +152,46 @@ public class RandomRNG : RNG {
 
 [PublicAPI]
 public struct GameHooks {
+	[Obsolete("Create your own GameHooks instead.")]
 	public static readonly GameHooks Default;
 
 	public delegate void PreGamePrepType(GameContext context);
 	public delegate void PreTurnType(GameContext context);
 	public delegate void PostTurnType(GameContext context);
+	public delegate IEnumerable<(Player player, ActionSet action)> GetActionsType(GameContext context, IEnumerable<Player> activePlayers);
 
-	public PreGamePrepType PreGamePrep;
-	public PreTurnType PreTurn;
-	public PostTurnType PostTurn;
+	public required PreGamePrepType PreGamePrep;
+	public required PreTurnType PreTurn;
+	public required PostTurnType PostTurn;
+	public required GetActionsType GetActions;
 
-	static GameHooks() {
-		Default = new GameHooks {
-			PreGamePrep = DefaultPreGamePrep,
-			PreTurn = DefaultPreTurn,
-			PostTurn = DefaultPostTurn
+	public static GameHooks MakeAsyncRules(GetActionsType getActions) {
+		return new GameHooks {
+			PreGamePrep = StandardPreGamePrep,
+			PreTurn = NoopPreTurn,
+			PostTurn = AsyncPostTurn,
+			GetActions = getActions
 		};
 	}
 
-	private static void DefaultPreTurn(GameContext context) { /* do nothing */ }
+	static GameHooks() {
+		Default = new GameHooks {
+			PreGamePrep = StandardPreGamePrep,
+			PreTurn = NoopPreTurn,
+			PostTurn = AsyncPostTurn,
+			GetActions = LegacyGetPlayerActions
+		};
+	}
 
-	private static void DefaultPostTurn(GameContext context) {
+	public static void NoopPreTurn(GameContext context) { /* do nothing */ }
+
+	public static void AsyncPostTurn(GameContext context) {
 		if(context is { TurnCounter: 109 }) {
 			context.SetVictor(PlayerRole.DEFENDER);
 		}
 	}
 
-	private static void DefaultPreGamePrep(GameContext context) {
+	public static void StandardPreGamePrep(GameContext context) {
 		using CardList cards = GameExecution.FisherYatesShuffle(context.rng, Card.allCards);
 		int j = 0;
 		for(int i = 0; i < 13; i++) {
@@ -180,6 +201,17 @@ public struct GameHooks {
 			context.board[CellName.L3].cards.Add(cards[j++]);
 			context.board[CellName.L4].cards.Add(cards[j++]);
 			context.board[CellName.L5].cards.Add(cards[j++]);
+		}
+	}
+
+	[Obsolete("Implement your own `GetActions` hook instead. This method may disappear in future.")]
+	public static IEnumerable<(Player player, ActionSet action)> LegacyGetPlayerActions(GameContext context, IEnumerable<Player> activePlayers) {
+		foreach(Player player in activePlayers) {
+			if(player.actor is ActionablePlayerActor actionableActor) {
+				yield return (player, actionableActor.GetAndConsumeAction());
+			} else {
+				throw new Exception("Cannot handle an non-ActionablePlayerActor via LegacyGetPlayerActions!");
+			}
 		}
 	}
 }
