@@ -3,7 +3,7 @@ using Fayti1703.CommonLib;
 namespace BinaryMatrix.Engine.Tests;
 
 public class TestPlayerActor : PlayerActor {
-	public ActionSet currentAction = ActionSet.NONE;
+	public ActionSet? currentAction;
 	public OperationError lastOperationError = OperationError.NONE;
 
 	public void ReportOperationError(OperationError error) {
