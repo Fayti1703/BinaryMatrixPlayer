@@ -5,10 +5,12 @@ namespace BinaryMatrix.Accessor;
 public static class Program {
 	public static void Main() {
 
-		Player attacker = new(new PlayerID(PlayerRole.ATTACKER, 0), new ConsolePlayerActor());
-		Player defender = new(new PlayerID(PlayerRole.DEFENDER, 0), new ConsolePlayerActor());
+		ConsolePlayerActor attacker = new();
+		attacker.player = new Player(new PlayerID(PlayerRole.ATTACKER, 0), attacker);
+		ConsolePlayerActor defender = new();
+		defender.player = new Player(new PlayerID(PlayerRole.DEFENDER, 0), defender);
 
-		GameContext context = new(new[] { attacker, defender }, new RandomRNG(new Random(1024)), GameHooks.Default);
+		GameContext context = new(new[] { attacker.player, defender.player }, new RandomRNG(new Random(1024)), GameHooks.Default);
 
 		context.Setup();
 
@@ -16,7 +18,7 @@ public static class Program {
 		while(context.Victor == null) {
 			bool isDef = context.TurnCounter % 2 == 0;
 			if(context.TurnCounter != lastTurnCounter) {
-				CommandExecution.PrintPrompt(context, isDef ? defender : attacker);
+				CommandExecution.PrintPrompt(context, (isDef ? defender : attacker).player);
 				lastTurnCounter = context.TurnCounter;
 			}
 			string? cmd;

@@ -29,7 +29,7 @@ public static class Macros {
 
 	public static void RunMacro(GameContext context, ActionSet[] actions) {
 		foreach(ActionSet action in actions) {
-			Player player = context.TurnCounter % 2 == 0 ? context.Defenders.First() : context.Attackers.First();
+			Player player = context.TurnCounter % 2 == 0 ? context.Defenders[0] : context.Attackers[0];
 			((ConsolePlayerActor) player.actor).action = action;
 			context.Tick();
 		}
