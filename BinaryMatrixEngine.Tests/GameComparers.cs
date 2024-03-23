@@ -5,6 +5,83 @@ using Fayti1703.CommonLib.Enumeration;
 
 namespace BinaryMatrix.Engine.Tests;
 
+public class GameBoardComparer : IEqualityComparer<GameBoard> {
+	private IEqualityComparer<Cell> cellComparer;
+
+	public GameBoardComparer(IEqualityComparer<Cell> cellComparer) {
+		this.cellComparer = cellComparer;
+	}
+
+	public bool Equals(GameBoard? x, GameBoard? y) {
+		if(x == null || y == null) return x == null && y == null;
+		return Enum.GetValues<CellName>().All(cellName =>
+				this.cellComparer.Equals(x[cellName], y[cellName])
+		);
+	}
+
+	public int GetHashCode(GameBoard obj) {
+		return Enum.GetValues<CellName>().Select(cellName =>
+			this.cellComparer.GetHashCode(obj[cellName])
+		).Aggregate(1, HashCode.Combine);
+	}
+
+	public static GameBoardComparer CreateDefault() =>
+		new(new CellComparer(new CardListComparer(new StrictCardComparer())))
+	;
+}
+
+public class CellComparer : IEqualityComparer<Cell> {
+	private IEqualityComparer<CardList> cardsComparerer;
+
+	public CellComparer(IEqualityComparer<CardList> cardsComparerer) {
+		this.cardsComparerer = cardsComparerer;
+	}
+
+	public bool Equals(Cell? x, Cell? y) {
+		if(x == null || y == null) return x == null && y == null;
+		return
+			x.name == y.name &&
+			x.Revealed == y.Revealed &&
+			this.cardsComparerer.Equals(x.cards, y.cards)
+		;
+	}
+
+	public int GetHashCode(Cell obj) {
+		return HashCode.Combine(obj.cards, (int) obj.name);
+	}
+}
+
+public class CardListComparer : IEqualityComparer<CardList> {
+	private readonly IEqualityComparer<Card> cardComparer;
+
+	public CardListComparer(IEqualityComparer<Card> cardComparer) {
+		this.cardComparer = cardComparer;
+	}
+
+	public bool Equals(CardList? x, CardList? y) {
+		if((x?.Count ?? 0) != (y?.Count ?? 0)) return false;
+		if(x == null || y == null) return true;
+		return x.WithIndex().All(pair => this.cardComparer.Equals(pair.value, y[pair.index]));
+	}
+
+	public int GetHashCode(CardList obj) =>
+		obj.Select(this.cardComparer.GetHashCode).Aggregate(1, HashCode.Combine)
+	;
+}
+
+/* By default, two `Card`s are considered the same `Card` even if their `revealed` state is different.
+ * For test-cases, we care about the `revealed` state; so we must override the equality.
+ */
+public class StrictCardComparer : IEqualityComparer<Card> {
+	public bool Equals(Card x, Card y) {
+		return x.ID == y.ID && x.revealed == y.revealed;
+	}
+
+	public int GetHashCode(Card obj) {
+		return HashCode.Combine(obj.ID, obj.revealed);
+	}
+}
+
 public class CombatLogComparer : IEqualityComparer<CombatLog> {
 	private readonly IEqualityComparer<IReadOnlyList<CombatSpecialLog>> specialsComparer;
 	private readonly IEqualityComparer<IReadOnlyList<CardMoveLog>> resultsComparer;
