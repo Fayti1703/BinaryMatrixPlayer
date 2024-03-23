@@ -6,7 +6,7 @@ namespace BinaryMatrix.Engine.Tests;
 [TestClass]
 public class CardListTest {
 	[AssemblyInitialize]
-	public static void TurnOnFastFail() { CardList.FAIL_FAST_INVALID = true; }
+	public static void TurnOnFastFail(TestContext context) { CardList.FAIL_FAST_INVALID = true; }
 
 	[TestMethod]
 	public void EmptyListTest() {
