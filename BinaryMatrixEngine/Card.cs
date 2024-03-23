@@ -41,11 +41,11 @@ public readonly struct CardID : IEquatable<CardID> {
 	public readonly Axiom axiom;
 	public readonly Value value;
 
-	public CardID(Axiom axiom, Value value) {
-		if(axiom < Axiom.DATA || axiom > Axiom.CHOICE)
-			throw new ArgumentException("Invalid suit provided.", nameof(axiom));
+	public CardID(Value value, Axiom axiom) {
 		if(value < Value.TWO || value > Value.TRAP)
 			throw new ArgumentException("Invalid value provided.", nameof(value));
+		if(axiom < Axiom.DATA || axiom > Axiom.CHOICE)
+			throw new ArgumentException("Invalid suit provided.", nameof(axiom));
 
 		this.axiom = axiom;
 		this.value = value;
@@ -56,7 +56,7 @@ public readonly struct CardID : IEquatable<CardID> {
 	public bool IsUnknown => this.axiom == 0 || this.value == 0;
 
 	static CardID() {
-		allIDs = Enum.GetValues<Axiom>().SelectMany(_ => Enum.GetValues<Value>(), (axiom, value) => new CardID(axiom, value)).ToImmutableList();
+		allIDs = Enum.GetValues<Value>().SelectMany(_ => Enum.GetValues<Axiom>(), (value, axiom) => new CardID(value, axiom)).ToImmutableList();
 	}
 
 	public static readonly IReadOnlyList<CardID> allIDs;
@@ -149,8 +149,8 @@ public struct Card : IEquatable<Card> {
 		this.ID = id;
 	}
 
-	public Card(Axiom axiom, Value value) {
-		this.ID = new CardID(axiom, value);
+	public Card(Value value, Axiom axiom) {
+		this.ID = new CardID(value, axiom);
 	}
 
 	/* A particular card cannot ever have an unknown ID. */
