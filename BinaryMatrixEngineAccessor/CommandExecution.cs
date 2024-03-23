@@ -5,7 +5,7 @@ namespace BinaryMatrix.Accessor;
 
 public class CommandExecution {
 	/* FIXME?: This doesn't support multiple players per side yet */
-	public static void RunCommand(GameContext game, ConsolePlayer activePlayer, string cmd) {
+	public static void RunCommand(GameContext game, ConsolePlayerActor activePlayer, string cmd) {
 		if(cmd.Length == 0) return;
 		switch(cmd[0]) {
 			case '/':
@@ -18,7 +18,6 @@ public class CommandExecution {
 					Console.WriteLine("Could not parse your input.");
 					return;
 				}
-
 				activePlayer.action = action.Value;
 				goto case '-';
 			case '-':
@@ -27,7 +26,7 @@ public class CommandExecution {
 		}
 	}
 
-	private static void RunMetaCommand(GameContext game, ConsolePlayer activePlayer, string cmd) {
+	private static void RunMetaCommand(GameContext game, ConsolePlayerActor activePlayer, string cmd) {
 		switch(cmd) {
 			#if false
 			case "full-state":
@@ -38,10 +37,10 @@ public class CommandExecution {
 				PrintBoard(game.board);
 				break;
 			case "hand":
-				PrintHand(activePlayer);
+				PrintHand(activePlayer.player);
 				break;
 			case "prompt":
-				PrintPrompt(game, activePlayer);
+				PrintPrompt(game, activePlayer.player);
 				break;
 			case "macro1":
 				Macros.RunMacro(game, Macros.Macro1);
@@ -51,14 +50,14 @@ public class CommandExecution {
 		}
 	}
 
-	public static void PrintPrompt(GameContext game, ConsolePlayer activePlayer) {
+	public static void PrintPrompt(GameContext game, Player activePlayer) {
 		PrintHeader(game);
 		PrintHand(activePlayer);
 
 		PrintBoard(game.board);
 	}
 
-	private static void PrintHand(ConsolePlayer activePlayer) {
+	private static void PrintHand(Player activePlayer) {
 		Console.Write("h{0}0: ", activePlayer.Role == PlayerRole.ATTACKER ? "a" : "d");
 		WriteCards(activePlayer.Hand);
 		Console.Write("\n");

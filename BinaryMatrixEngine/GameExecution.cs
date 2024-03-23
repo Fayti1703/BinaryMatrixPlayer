@@ -23,7 +23,7 @@ public static class GameExecution {
 	public static void ExecutePlayerTurn(GameContext context, Player player, ActionSet action, HashSet<Cell> drawnDecks, out ActionLog log) {
 		OperationError error = ExecutePlayerAction(context, player, action, drawnDecks, out log);
 		if(error != OperationError.NONE) {
-			player.ReportOperationError(error);
+			player.actor.ReportOperationError(error);
 			player.InvalidOperationCount++;
 			if(player.InvalidOperationCount == 2) {
 				SuccessiveInvalidOperationSteps(context, player);
@@ -52,7 +52,7 @@ public static class GameExecution {
 	}
 
 	public static OperationError ExecutePlayerAction(GameContext context, Player player, ActionSet action, HashSet<Cell> drawnDecks, out ActionLog log) {
-		log = new ActionLog(context.GetPlayerID(player), new ResolvedActionSet(ActionType.NONE), null);
+		log = new ActionLog(player.ID, new ResolvedActionSet(ActionType.NONE), null);
 		switch(action.type) {
 			case ActionType.NONE:
 				log = new ActionLog(log.whoDidThis, new ResolvedActionSet(ActionType.NONE, explicitNone: true), null);
@@ -297,7 +297,7 @@ public static class GameExecution {
 
 		if(damage > 0) {
 			if(player.Role == PlayerRole.ATTACKER) {
-				PlayerID attackerID = context.GetPlayerID(player);
+				PlayerID attackerID = player.ID;
 				while(damage > 0) {
 					if(!TryDraw(context, lane.laneDeck, player, out CardID logCard)) {
 						context.SetVictor(PlayerRole.ATTACKER);

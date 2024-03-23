@@ -2,7 +2,6 @@ using System.Collections;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
-using Fayti1703.CommonLib;
 using Fayti1703.CommonLib.Enumeration;
 
 namespace BinaryMatrix.Engine.BinlogRenderers;
