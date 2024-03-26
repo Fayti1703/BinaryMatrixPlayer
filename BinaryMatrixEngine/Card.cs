@@ -63,10 +63,10 @@ public readonly struct CardID : IEquatable<CardID> {
 
 	override public string ToString() {
 		return this.IsUnknown ? "X" :
-				new string(new [] {
-					ValueToSymbol(this.value),
-					AxiomToSymbol(this.axiom)
-				})
+			new string(new [] {
+				ValueToSymbol(this.value),
+				AxiomToSymbol(this.axiom)
+			})
 		;
 	}
 
