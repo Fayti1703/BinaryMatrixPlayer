@@ -71,8 +71,8 @@ public static class GameExecution {
 					Lane lane = context.board.GetLane(action.lane);
 					if(player.Role == PlayerRole.ATTACKER) {
 						if(lane.defenderStack.cards.Count != 0) return OperationError.LANE_BLOCKED;
-						if(!drawnDecks.Add(lane.laneDeck)) return OperationError.DOUBLE_DRAW;
 					}
+					if(!drawnDecks.Add(lane.laneDeck)) return OperationError.DOUBLE_DRAW;
 
 					bool drawOK = TryDraw(context, lane.laneDeck, player, out CardID drawnCard);
 					if(!drawOK) {
