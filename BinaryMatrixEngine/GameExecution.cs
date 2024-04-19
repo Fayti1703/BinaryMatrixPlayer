@@ -274,7 +274,7 @@ public static class GameExecution {
 			lane.attackerStack.cards.MoveAllTo(lane.discardPile.cards);
 			lane.attackerStack.Revealed = false;
 			if(lane.defenderStack.cards.Count == 0) /* shouldn't be possible, but best to be prudent */
-				lane.defenderStack.Revealed = false;
+				lane.defenderStack.Revealed = false; // dotcover disable this line
 			combatLog = log.Finish();
 			return;
 		}
