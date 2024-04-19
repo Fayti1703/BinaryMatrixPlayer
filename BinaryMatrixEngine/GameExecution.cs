@@ -247,10 +247,10 @@ public static class GameExecution {
 				DiscardBounces(context, lane.defenderStack, context.board[XA], out IReadOnlyList<CardMoveLog>? defBounces);
 				if(defBounces != null) log.AddSpecialLog(new CombatSpecialLog(SpecialType.BOUNCE, PlayerRole.DEFENDER, defBounces));
 				DiscardBounces(context, lane.attackerStack, lane.discardPile, out IReadOnlyList<CardMoveLog>? atkBounces);
-				if(atkBounces != null) log.AddSpecialLog(new CombatSpecialLog(SpecialType.BOUNCE, PlayerRole.DEFENDER, atkBounces));
+				if(atkBounces != null) log.AddSpecialLog(new CombatSpecialLog(SpecialType.BOUNCE, PlayerRole.ATTACKER, atkBounces));
 			} else {
 				DiscardBounces(context, lane.attackerStack, lane.discardPile, out IReadOnlyList<CardMoveLog>? atkBounces);
-				if(atkBounces != null) log.AddSpecialLog(new CombatSpecialLog(SpecialType.BOUNCE, PlayerRole.DEFENDER, atkBounces));
+				if(atkBounces != null) log.AddSpecialLog(new CombatSpecialLog(SpecialType.BOUNCE, PlayerRole.ATTACKER, atkBounces));
 				DiscardBounces(context, lane.defenderStack, context.board[XA], out IReadOnlyList<CardMoveLog>? defBounces);
 				if(defBounces != null) log.AddSpecialLog(new CombatSpecialLog(SpecialType.BOUNCE, PlayerRole.DEFENDER, defBounces));
 			}
