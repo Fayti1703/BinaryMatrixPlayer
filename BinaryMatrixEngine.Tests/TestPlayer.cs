@@ -1,4 +1,3 @@
-using Fayti1703.CommonLib;
 
 namespace BinaryMatrix.Engine.Tests;
 
