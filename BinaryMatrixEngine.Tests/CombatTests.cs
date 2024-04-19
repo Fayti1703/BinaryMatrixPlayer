@@ -167,4 +167,34 @@ public class CombatTests {
 		expectedBoard[X0].cards.Add(new Card(EIGHT, CHAOS) { revealed = true });
 		Assert.AreEqual(expectedBoard, game.board, gameBoardComparer);
 	}
+
+	[TestMethod]
+	public void SimpleTrapAttacker() {
+		GameContext game = CreateScenarioContext();
+		game.board[A0].cards.AddRange([ new Card(TRAP, CHAOS), new Card(EIGHT, CHAOS) ]);
+		game.board[D0].cards.Add(new Card(BOUNCE, CHAOS));
+		GameExecution.ResolveCombat(game, game.board[0], game.Attackers[0], out CombatLog log);
+		Assert.AreEqual(new CombatLog(
+			inLane: 0,
+			initialAS: [ new CardID(TRAP, CHAOS), new CardID(EIGHT, CHAOS) ],
+			initialDS: [ new CardID(BOUNCE, CHAOS) ],
+			specials: [ new CombatSpecialLog(SpecialType.TRAP, PlayerRole.ATTACKER,
+				CardMoveLog.SingleMove(new CardID(BOUNCE, CHAOS), XA)
+			) ],
+			attackerPower: 3, defenderPower: 0, damage: 4,
+			results: [
+				new CardMoveLog([ new CardID(TRAP, CHAOS), new CardID(EIGHT, CHAOS) ], XA)
+			],
+			victorDeclared: true
+		), log, combatLogComparer);
+
+		GameBoard expectedBoard = new();
+		expectedBoard[XA].cards.AddRange([
+			new Card(BOUNCE, CHAOS) { revealed = true },
+			new Card(TRAP, CHAOS) { revealed = true },
+			new Card(EIGHT, CHAOS) { revealed = true }
+		]);
+		Assert.AreEqual(expectedBoard, game.board, gameBoardComparer);
+		Assert.AreEqual(game.Victor, PlayerRole.ATTACKER);
+	}
 }
