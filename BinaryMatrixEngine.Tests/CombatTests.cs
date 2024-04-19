@@ -138,4 +138,33 @@ public class CombatTests {
 		]);
 		Assert.AreEqual(expectedBoard, game.board, gameBoardComparer);
 	}
+
+	[TestMethod]
+	public void SimpleVictoryDefense() {
+		GameContext game = CreateScenarioContext();
+		game.board[A0].cards.Add(new Card(EIGHT, CHAOS));
+		game.board[D0].cards.AddRange([ new Card(TEN, CHAOS), new Card(SIX, CHAOS) ]);
+		GameExecution.ResolveCombat(game, game.board[0], game.Attackers[0], out CombatLog log);
+
+		Assert.AreEqual(new CombatLog(
+			inLane: 0,
+			initialAS: [ new CardID(EIGHT, CHAOS) ],
+			initialDS: [ new CardID(TEN, CHAOS), new CardID(SIX, CHAOS) ],
+			specials: [],
+			attackerPower: 3, defenderPower: 4, damage: -1,
+			results: [
+				new CardMoveLog([ new CardID(EIGHT, CHAOS) ], X0),
+			],
+			victorDeclared: false
+		), log, combatLogComparer);
+
+		GameBoard expectedBoard = new();
+		expectedBoard[D0].cards.AddRange([
+			new Card(TEN, CHAOS) { revealed = true },
+			new Card(SIX, CHAOS) { revealed = true }
+		]);
+		expectedBoard[D0].Revealed = true;
+		expectedBoard[X0].cards.Add(new Card(EIGHT, CHAOS) { revealed = true });
+		Assert.AreEqual(expectedBoard, game.board, gameBoardComparer);
+	}
 }
