@@ -197,4 +197,31 @@ public class CombatTests {
 		Assert.AreEqual(expectedBoard, game.board, gameBoardComparer);
 		Assert.AreEqual(game.Victor, PlayerRole.ATTACKER);
 	}
+
+	[TestMethod]
+	public void BounceAttack() {
+		GameContext game = CreateScenarioContext();
+		game.board[A0].cards.Add(new Card(BOUNCE, CHAOS));
+		game.board[D0].cards.Add(new Card(FOUR, CHAOS));
+		GameExecution.ResolveCombat(game, game.board[0], game.Attackers[0], out CombatLog log);
+		Assert.AreEqual(new CombatLog(
+			inLane: 0,
+			initialAS: [ new CardID(BOUNCE, CHAOS) ],
+			initialDS: [ new CardID(FOUR, CHAOS) ],
+			specials: [ new CombatSpecialLog(SpecialType.BOUNCE, PlayerRole.ATTACKER,
+				CardMoveLog.SingleMove(new CardID(BOUNCE, CHAOS), X0)
+			) ],
+			attackerPower: 0, defenderPower: 0, damage: 0,
+			results: [],
+			victorDeclared: false
+		), log, combatLogComparer);
+
+		GameBoard expectedBoard = new();
+		expectedBoard[D0].cards.AddRange([
+			new Card(FOUR, CHAOS) { revealed = true }
+		]);
+		expectedBoard[D0].Revealed = true;
+		expectedBoard[X0].cards.Add(new Card(BOUNCE, CHAOS) { revealed = true });
+		Assert.AreEqual(expectedBoard, game.board, gameBoardComparer);
+	}
 }
