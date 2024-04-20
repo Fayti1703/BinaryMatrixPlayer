@@ -272,6 +272,7 @@ public class CombatTests {
 		game.board[A0].cards.AddRange([ new Card(TRAP, CHAOS), new Card(EIGHT, CHAOS) ]);
 		game.board[D0].cards.Add(new Card(BOUNCE, CHAOS));
 		GameExecution.ResolveCombat(game, game.board[0], game.Attackers[0], out CombatLog log);
+
 		Assert.AreEqual(new CombatLog(
 			inLane: 0,
 			initialAS: [ new CardID(TRAP, CHAOS), new CardID(EIGHT, CHAOS) ],
@@ -302,6 +303,7 @@ public class CombatTests {
 		game.board[A0].cards.Add(new Card(BOUNCE, CHAOS));
 		game.board[D0].cards.Add(new Card(FOUR, CHAOS));
 		GameExecution.ResolveCombat(game, game.board[0], game.Attackers[0], out CombatLog log);
+
 		Assert.AreEqual(new CombatLog(
 			inLane: 0,
 			initialAS: [ new CardID(BOUNCE, CHAOS) ],
