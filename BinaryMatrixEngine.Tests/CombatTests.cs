@@ -204,6 +204,40 @@ public class CombatTests {
 	}
 
 	[TestMethod]
+	public void BreakDefenseBlunderCombat() {
+		GameContext game = CreateScenarioContext();
+		game.board[A0].cards.AddRange([ new Card(EIGHT, CHAOS), new Card(EIGHT, CHOICE) ]);
+		game.board[D0].cards.AddRange([ new Card(FOUR, CHAOS), new Card(BREAK, CHAOS) { revealed = true } ]);
+		game.board[L0].cards.AddRange([ new Card(FIVE, CHAOS) ]);
+		GameExecution.ResolveCombat(game, game.board[0], game.Defenders[0], out CombatLog log);
+
+		Assert.AreEqual(new CombatLog(
+			inLane: 0,
+			initialAS: [ new CardID(EIGHT, CHAOS), new CardID(EIGHT, CHOICE) ],
+			initialDS: [ new CardID(FOUR, CHAOS), new CardID(BREAK, CHAOS) ],
+			specials: [],
+			attackerPower: 4, defenderPower: 2, damage: 4,
+			results: [
+				new CardMoveLog([ new CardID(EIGHT, CHAOS), new CardID(EIGHT, CHOICE) ], XA),
+				new CardMoveLog([ new CardID(BREAK, CHAOS), new CardID(FOUR, CHAOS) ], XA),
+				new CardMoveLog([ CardID.Unknown ], new PlayerID(PlayerRole.ATTACKER, 0))
+			],
+			victorDeclared: true
+		), log, combatLogComparer);
+
+		GameBoard expectedBoard = new();
+		expectedBoard[XA].cards.AddRange([
+			new Card(EIGHT, CHAOS) { revealed = true },
+			new Card(EIGHT, CHOICE) { revealed = true },
+			new Card(BREAK, CHAOS) { revealed = true },
+			new Card(FOUR, CHAOS) { revealed = true },
+		]);
+		Assert.AreEqual(expectedBoard, game.board, gameBoardComparer);
+		Assert.AreEqual(game.Attackers[0].Hand, new CardList { new(FIVE, CHAOS) }, cardListComparer);
+		Assert.AreEqual(game.Victor, PlayerRole.ATTACKER);
+	}
+
+	[TestMethod]
 	public void SimpleVictoryDefense() {
 		GameContext game = CreateScenarioContext();
 		game.board[A0].cards.Add(new Card(EIGHT, CHAOS));
