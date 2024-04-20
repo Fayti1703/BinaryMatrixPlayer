@@ -12,10 +12,10 @@ public class CombatTests {
 	public static readonly IEqualityComparer<CardList> cardListComparer = new CardListComparer(new StrictCardComparer());
 	public static readonly IEqualityComparer<GameBoard> gameBoardComparer = new GameBoardComparer(new CellComparer(cardListComparer));
 
-	private static GameContext CreateScenarioContext() {
+	private static GameContext CreateScenarioContext(int[]? rngSequence = null) {
 		Player attacker = new(PlayerRole.ATTACKER, 0, new TestPlayerActor());
 		Player defender = new(PlayerRole.DEFENDER, 0, new TestPlayerActor());
-		StaticRNG rng = new(Array.Empty<int>());
+		StaticRNG rng = new(rngSequence ?? Array.Empty<int>());
 		GameContext game = new(new[] { attacker, defender }, rng, TestGameHooks.CreateDefaultHooks());
 		return game;
 	}
