@@ -322,4 +322,64 @@ public class CombatTests {
 		expectedBoard[X0].cards.Add(new Card(BOUNCE, CHAOS) { revealed = true });
 		Assert.AreEqual(expectedBoard, game.board, gameBoardComparer);
 	}
+
+	[TestMethod]
+	public void BreakAttack() {
+		GameContext game = CreateScenarioContext();
+		game.board[A0].cards.AddRange([ new Card(TWO, CHAOS), new Card(BREAK, CHAOS) ]);
+		game.board[D0].cards.AddRange([ new Card(THREE, CHAOS), new Card(THREE, CHOICE), new Card(THREE, KIN) ]);
+		GameExecution.ResolveCombat(game, game.board[0], game.Attackers[0], out CombatLog log);
+
+		Assert.AreEqual(new CombatLog(
+			inLane: 0,
+			initialAS: [ new CardID(TWO, CHAOS), new CardID(BREAK, CHAOS) ],
+			initialDS: [ new CardID(THREE, CHAOS), new CardID(THREE, CHOICE), new CardID(THREE, KIN) ],
+			specials: [],
+			attackerPower: 1, defenderPower: 0, damage: 3,
+			results: [
+				new CardMoveLog([ new CardID(TWO, CHAOS), new CardID(BREAK, CHAOS) ], XA),
+				new CardMoveLog([ new CardID(THREE, KIN), new CardID(THREE, CHOICE), new CardID(THREE, CHAOS) ], XA)
+			],
+			victorDeclared: false
+		), log, combatLogComparer);
+
+		GameBoard expectedBoard = new();
+		expectedBoard[XA].cards.AddRange([
+			new Card(TWO, CHAOS) { revealed = true },
+			new Card(BREAK, CHAOS) { revealed = true },
+			new Card(THREE, KIN) { revealed = true },
+			new Card(THREE, CHOICE) { revealed = true },
+			new Card(THREE, CHAOS) { revealed = true }
+		]);
+		Assert.AreEqual(expectedBoard, game.board, gameBoardComparer);
+	}
+
+	[TestMethod]
+	public void SimpleVictoryAttacker() {
+		GameContext game = CreateScenarioContext();
+		game.board[A0].cards.AddRange([ new Card(TEN, CHAOS), new Card(SIX, CHAOS) ]);
+		game.board[D0].cards.AddRange([ new Card(EIGHT, CHAOS) ]);
+		GameExecution.ResolveCombat(game, game.board[0], game.Attackers[0], out CombatLog log);
+
+		Assert.AreEqual(new CombatLog(
+			inLane: 0,
+			initialAS: [ new CardID(TEN, CHAOS), new CardID(SIX, CHAOS) ],
+			initialDS: [ new CardID(EIGHT, CHAOS) ],
+			specials: [],
+			attackerPower: 4, defenderPower: 3, damage: 2,
+			results: [
+				new CardMoveLog([ new CardID(TEN, CHAOS), new CardID(SIX, CHAOS) ], XA),
+				new CardMoveLog([ new CardID(EIGHT, CHAOS) ], XA)
+			],
+			victorDeclared: true
+		), log, combatLogComparer);
+
+		GameBoard expectedBoard = new();
+		expectedBoard[XA].cards.AddRange([
+			new Card(TEN, CHAOS) { revealed = true },
+			new Card(SIX, CHAOS) { revealed = true },
+			new Card(EIGHT, CHAOS) { revealed = true }
+		]);
+		Assert.AreEqual(expectedBoard, game.board, gameBoardComparer);
+	}
 }
