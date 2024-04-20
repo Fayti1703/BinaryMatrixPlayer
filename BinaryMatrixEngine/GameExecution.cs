@@ -378,6 +378,7 @@ public static class GameExecution {
 			logCard = default;
 			if(discard.cards.Count == 0) return false;
 			using CardList cards = FisherYatesShuffle(context.rng, discard.cards);
+			foreach(ref Card card in cards) card.revealed = false;
 			discard.cards.Clear();
 			cards.MoveAllTo(stack.cards);
 			if(stack.name is >= L3 and <= L5) stack.cards.Last().Apply((ref Card x) => x.revealed = true);
