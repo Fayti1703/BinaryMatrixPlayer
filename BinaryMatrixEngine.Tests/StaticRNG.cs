@@ -15,6 +15,8 @@ public class StaticRNG : RNG {
 	}
 
 	public int Next(int upperBound) {
+		if(this.index >= this.values.Length)
+			throw new InvalidOperationException($"Missing an RNG value for a request (< {upperBound})!");
 		int value = this.values[this.index];
 		if(value >= upperBound)
 			throw new InvalidOperationException($"The currently provided value is out of range for the request ({value} >= {upperBound}). Occurred at index #{this.index}");
