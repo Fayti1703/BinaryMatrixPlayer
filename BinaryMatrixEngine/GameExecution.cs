@@ -15,8 +15,7 @@ public enum OperationError {
 	BREAK_ON_EMPTY,
 	DOUBLE_FACEUP_BREAK_IN_DEFENSE,
 	WRONG_ROLE,
-	UNKNOWN_CARD,
-	UNKNOWN_LANE
+	UNKNOWN_CARD
 }
 
 public static class GameExecution {
@@ -94,7 +93,7 @@ public static class GameExecution {
 			} break;
 			case ActionType.PLAY:
 			case ActionType.FACEUP_PLAY: {
-				if(action.lane == ActionSet.LANE_A) return OperationError.UNKNOWN_LANE;
+				Debug.Assert(action.lane != ActionSet.LANE_A);
 				Indexed<Card>? result = ResolveCard(action.card!, player);
 				if(result == null) return OperationError.UNKNOWN_CARD;
 
@@ -169,7 +168,7 @@ public static class GameExecution {
 				}
 			} break;
 			case ActionType.COMBAT: {
-				if(action.lane == ActionSet.LANE_A) return OperationError.UNKNOWN_LANE;
+				Debug.Assert(action.lane != ActionSet.LANE_A);
 				if(player.Role == PlayerRole.DEFENDER) return OperationError.WRONG_ROLE;
 				Lane lane = context.board.GetLane(action.lane);
 				if(lane.attackerStack.cards.Count == 0) return OperationError.EMPTY_STACK;
