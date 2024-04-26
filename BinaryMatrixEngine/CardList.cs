@@ -92,6 +92,16 @@ public sealed class CardList : IEnumerable<Card>, IDisposable {
 		return ref this.cards[this.Count - 1];
 	}
 
+	public void AddRange(IList<Card> cards) {
+		this.EnsureFreeCapacity(cards.Count);
+		if(FAIL_FAST_INVALID) {
+			if(cards.Any(card => card.IsInvalid))
+				throw new ArgumentException("The provided list contains an invalid card!", nameof(cards));
+		}
+		cards.CopyTo(this.cards, this.Count);
+		this.Count += cards.Count;
+	}
+
 	public void AddAll(CardList cards) {
 		this.EnsureFreeCapacity(cards.Count);
 

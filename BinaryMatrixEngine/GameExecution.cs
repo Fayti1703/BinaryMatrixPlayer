@@ -206,7 +206,7 @@ public static class GameExecution {
 		results = log.FinishOptional();
 	}
 
-	private static void ResolveCombat(GameContext context, Lane lane, Player player, out CombatLog combatLog) {
+	internal static void ResolveCombat(GameContext context, Lane lane, Player player, out CombatLog combatLog) {
 		CombatLogBuilder log = new() {
 			inLane = lane.laneNo,
 			initialAS = lane.attackerStack.cards.Select(x => x.ID).ToImmutableList(),
@@ -274,7 +274,7 @@ public static class GameExecution {
 			lane.attackerStack.cards.MoveAllTo(lane.discardPile.cards);
 			lane.attackerStack.Revealed = false;
 			if(lane.defenderStack.cards.Count == 0) /* shouldn't be possible, but best to be prudent */
-				lane.defenderStack.Revealed = false;
+				lane.defenderStack.Revealed = false; // dotcover disable this line
 			combatLog = log.Finish();
 			return;
 		}
