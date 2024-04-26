@@ -13,7 +13,7 @@ public interface CardSpecification {
 	public int? ResolveForPlayer(Player player);
 }
 
-public struct ActionSet {
+public readonly struct ActionSet {
 	public readonly ActionType type;
 	public readonly int lane;
 	public readonly CardSpecification? card;
