@@ -105,6 +105,7 @@ public sealed class GameContext : IDisposable {
 	}
 
 	public PlayerRole? Tick() {
+		if(this.Victor != null) return this.Victor;
 		this.hooks.PreTurn(this);
 		IEnumerable<Player> activePlayers = this.TurnCounter % 2 == 0 ? this.Defenders : this.Attackers;
 		{
