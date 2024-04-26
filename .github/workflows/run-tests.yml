@@ -1,0 +1,48 @@
+name: Run Tests
+permissions:
+  contents: read
+on:
+  - push
+  - pull_request
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  run_tests:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.0.x
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Prepare .NET tools
+        run: |
+          cd BinaryMatrixEngine.Tests
+          dotnet tool restore
+      - name: Run Tests with Coverage
+        id: run_tests
+        continue-on-error: true
+        run: |
+          cd BinaryMatrixEngine.Tests
+          dotnet dotCover cover-dotnet --Output=${{ runner.temp }}/coverage.report -- test
+      - name: Produce Coverage Report
+        run: |
+          cd BinaryMatrixEngine.Tests
+          dotnet dotCover report --Source=${{ runner.temp }}/coverage.report --Output=${{ runner.temp }}/coverage.json --ReportType=JSON
+      - name: Upload Coverage Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: Coverage Report
+          path: |
+            ${{ runner.temp }}/coverage.report
+            ${{ runner.temp }}/coverage.json
+      - name: Produce Job Summary
+        run: |
+          printf "${{ steps.run_tests.outcome == 'success' && 'Test run success!' || 'Test run **FAILED**!' }}\n**Engine Coverage**: %s%%\n**Test Code Utilization**: %s%%" \
+            "$(jq '.Children[] | select(.Kind == "Assembly" and .Name == "BinaryMatrixEngine") | .CoveragePercent' "${{ runner.temp }}/coverage.json")" \
+            "$(jq '.Children[] | select(.Kind == "Assembly" and .Name == "BinaryMatrixEngine.Tests") | .CoveragePercent' "${{ runner.temp }}/coverage.json")" \
+          > $GITHUB_STEP_SUMMARY
