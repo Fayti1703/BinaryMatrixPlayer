@@ -26,6 +26,29 @@ public class PlayerData : IDisposable {
 	}
 }
 
+public readonly struct PlayerID {
+	public readonly PlayerRole role;
+	public readonly int index;
+
+	public PlayerID(PlayerRole role, int index) {
+		this.role = role;
+		this.index = index;
+	}
+
+	override public string ToString() {
+		return (this.role == PlayerRole.ATTACKER ? 'a' : 'd') + this.index.ToString();
+	}
+}
+
+public interface PlayerActor : IDisposable {
+	public void ReportOperationError(OperationError error);
+}
+
+[Obsolete("Implement your own `GetActions` hook instead of relying on this interface.")]
+public interface ActionablePlayerActor : PlayerActor {
+	public ActionSet GetAndConsumeAction();
+}
+
 public sealed class Player : IDisposable {
 	public Player(
 		PlayerRole role,
@@ -60,28 +83,5 @@ public sealed class Player : IDisposable {
 	public void Dispose() {
 		this.data.Dispose();
 		this.actor.Dispose();
-	}
-}
-
-public interface PlayerActor : IDisposable {
-	public void ReportOperationError(OperationError error);
-}
-
-[Obsolete("Implement your own `GetActions` hook instead of relying on this interface.")]
-public interface ActionablePlayerActor : PlayerActor {
-	public ActionSet GetAndConsumeAction();
-}
-
-public readonly struct PlayerID {
-	public readonly PlayerRole role;
-	public readonly int index;
-
-	public PlayerID(PlayerRole role, int index) {
-		this.role = role;
-		this.index = index;
-	}
-
-	override public string ToString() {
-		return (this.role == PlayerRole.ATTACKER ? 'a' : 'd') + this.index.ToString();
 	}
 }
