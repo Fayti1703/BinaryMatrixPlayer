@@ -138,7 +138,7 @@ public sealed class GameContext : IDisposable {
 }
 
 public interface RNG {
-	/** <summary>Return a new random value, in the range <c>[0;rangeEnd[</c>.</summary> */
+	/** <summary>Return a new random value, in the range <c>[0;upperBound[</c>.</summary> */
 	int Next(int upperBound);
 }
 
