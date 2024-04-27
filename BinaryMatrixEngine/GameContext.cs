@@ -51,7 +51,7 @@ public sealed class GameContext : IDisposable {
 
 	public PlayerRole? Victor { get; private set; }
 
-	private GameContext(IEnumerable<Player> players, RNG rng, GameHooks? hooks, GameBoard board, List<TurnLog> binlog) {
+	private GameContext(IEnumerable<Player> players, RNG rng, GameHooks hooks, GameBoard board, List<TurnLog> binlog) {
 		/* fallbacks */
 		this.Attackers = ImmutableList<Player>.Empty;
 		this.Defenders = ImmutableList<Player>.Empty;
@@ -66,7 +66,7 @@ public sealed class GameContext : IDisposable {
 			}
 		}
 		this.rng = rng;
-		this.hooks = hooks ?? GameHooks.Default;
+		this.hooks = hooks;
 		this.board = board;
 		this.binlog = binlog;
 	}
