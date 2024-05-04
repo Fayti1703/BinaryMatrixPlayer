@@ -82,6 +82,7 @@ public sealed class GameContext : IDisposable {
 
 	public void Setup() {
 		/* Clean any remaining state from possible previous runs */
+		this.TurnCounter = 0;
 		this.board.Clear();
 		this.binlog.Clear();
 		foreach(Player player in this.Players)
