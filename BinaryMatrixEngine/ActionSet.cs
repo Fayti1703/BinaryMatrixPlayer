@@ -49,7 +49,7 @@ public readonly struct ActionSet {
 	private static int ValidateLane(int lane, bool allowPseudo = false) {
 		return lane switch {
 			< 0 or > LANE_A => throw new ArgumentOutOfRangeException(nameof(lane), lane, "Lane must be within the range [0; " + LANE_A + "]."),
-			LANE_A when !allowPseudo => throw new ArgumentOutOfRangeException(nameof(lane), lane, "Lane must name a real lane, not the `a` pseudolane for this action."),
+			LANE_A when !allowPseudo => throw new ArgumentOutOfRangeException(nameof(lane), lane, "Lane must name a real lane, not the `a` pseudolane, for this action."),
 			_ => lane
 		};
 	}
