@@ -2,7 +2,10 @@ name: Run Tests
 permissions:
   contents: read
 on:
-  - pull_request
+  pull_request:
+  push:
+    branches:
+      - "trunk"
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
