@@ -15,7 +15,7 @@ The actual game execution engine. Contains the main game logic.
 
 ### BinaryMatrixEngineTest
 
-Unit tests for the engine. _**Currently not implemented**_.
+Unit tests for the engine.
 
 ### BinaryMatrixEngineAccessor
 
