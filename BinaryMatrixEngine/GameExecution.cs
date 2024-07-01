@@ -19,7 +19,7 @@ public enum OperationError {
 }
 
 public static class GameExecution {
-	public static void ExecutePlayerTurn(GameContext context, Player player, ActionSet action, HashSet<Cell> drawnDecks, out ActionLog log) {
+	public static void ExecutePlayerTurn(GameContext context, Player player, ActionSet action, HashSet<CellName> drawnDecks, out ActionLog log) {
 		OperationError error = ExecutePlayerAction(context, player, action, drawnDecks, out log);
 		if(error != OperationError.NONE) {
 			player.actor.ReportOperationError(error);
@@ -50,7 +50,7 @@ public static class GameExecution {
 		player.Hand.Clear();
 	}
 
-	public static OperationError ExecutePlayerAction(GameContext context, Player player, ActionSet action, HashSet<Cell> drawnDecks, out ActionLog log) {
+	public static OperationError ExecutePlayerAction(GameContext context, Player player, ActionSet action, HashSet<CellName> drawnDecks, out ActionLog log) {
 		log = new ActionLog(player.ID, new ResolvedActionSet(ActionType.NONE), null);
 		switch(action.type) {
 			case ActionType.NONE:
@@ -71,7 +71,7 @@ public static class GameExecution {
 					if(player.Role == PlayerRole.ATTACKER) {
 						if(lane.defenderStack.cards.Count != 0) return OperationError.LANE_BLOCKED;
 					}
-					if(!drawnDecks.Add(lane.laneDeck)) return OperationError.DOUBLE_DRAW;
+					if(!drawnDecks.Add(lane.laneDeck.name)) return OperationError.DOUBLE_DRAW;
 
 					bool drawOK = TryDraw(context, lane.laneDeck, player, out CardID drawnCard);
 					if(!drawOK) {

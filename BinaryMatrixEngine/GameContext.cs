@@ -111,7 +111,7 @@ public sealed class GameContext : IDisposable {
 		IEnumerable<Player> activePlayers = this.TurnCounter % 2 == 0 ? this.Defenders : this.Attackers;
 		{
 			List<ActionLog> actions = new();
-			HashSet<Cell> drawnDecks = new();
+			HashSet<CellName> drawnDecks = new();
 			foreach((Player player, ActionSet action) in this.hooks.GetActions(this, activePlayers)) {
 				GameExecution.ExecutePlayerTurn(this, player, action, drawnDecks, out ActionLog actionLog);
 				actions.Add(actionLog);
