@@ -9,7 +9,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="JetBrains.Annotations" Version="2023.2.0" />
+		<PackageReference Include="JetBrains.Annotations" Version="2023.3.0" />
 		<PackageReference Include="Fayti1703.CommonLib" Version="1.1.0" />
 		<PackageReference Include="JetBrains.dotCover.MSBuild" Version="1.0.5-alpha">
 		  <PrivateAssets>all</PrivateAssets>
