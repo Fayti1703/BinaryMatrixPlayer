@@ -134,7 +134,7 @@ public class TraditionalBinlogRenderer : BinlogRenderer<string[]> {
 	private static StringBuilder RenderCardID(StringBuilder builder, CardID cardID) {
 		return cardID.IsUnknown ?
 			builder.Append('X') :
-			builder.Append(CardID.AxiomToSymbol(cardID.axiom)).Append(CardID.ValueToSymbol(cardID.value))
+			builder.Append(CardID.ValueToSymbol(cardID.value)).Append(CardID.AxiomToSymbol(cardID.axiom))
 		;
 	}
 }
