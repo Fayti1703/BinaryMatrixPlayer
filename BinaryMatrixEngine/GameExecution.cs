@@ -308,14 +308,14 @@ public static class GameExecution {
 				}
 			} else {
 				while(damage > 0) {
-					foreach((int index, Player attacker) in context.Attackers.WithIndex()) {
+					foreach(Player attacker in context.Attackers) {
 						if(damage == 0) break;
 						if(!TryDraw(context, lane.laneDeck, attacker, out CardID logCard)) {
 							context.SetVictor(PlayerRole.ATTACKER);
 							log.victorDeclared = true;
 							goto endLp;
 						}
-						log.results.Add(logCard, new PlayerID(PlayerRole.ATTACKER, index));
+						log.results.Add(logCard, attacker.ID);
 						damage--;
 					}
 				}
