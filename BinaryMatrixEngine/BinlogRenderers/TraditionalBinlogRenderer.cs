@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Fayti1703.CommonLib.Enumeration;
+using JetBrains.Annotations;
 
 namespace BinaryMatrix.Engine.BinlogRenderers;
 
@@ -198,6 +199,7 @@ internal class StringArrayBuilder : IReadOnlyList<string> {
 	public string[] ToArray() => this.entries.ToArray();
 
 	public IEnumerator<string> GetEnumerator() => this.entries.GetEnumerator();
+	[MustDisposeResource]
 	IEnumerator IEnumerable.GetEnumerator() => ( (IEnumerable) this.entries ).GetEnumerator();
 	public int Count => this.entries.Count;
 

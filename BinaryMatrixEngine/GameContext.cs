@@ -71,9 +71,11 @@ public sealed class GameContext : IDisposable {
 		this.binlog = binlog;
 	}
 
+	[MustDisposeResource]
 	public GameContext(IEnumerable<Player> players, RNG rng, GameHooks hooks)
 		: this(players, rng, hooks, new GameBoard(), new List<TurnLog>()) { }
 
+	[MustDisposeResource]
 	public GameContext(GameState state, IReadOnlyDictionary<PlayerID, PlayerActor> actors, RNG rng, GameHooks hooks)
 		: this(state.CreatePlayers(actors), rng, hooks, state.board.Copy(), new List<TurnLog>(state.binlog)) {
 		this.TurnCounter = state.turnCounter;
