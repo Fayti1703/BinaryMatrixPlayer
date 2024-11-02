@@ -87,8 +87,10 @@ public sealed class GameContext : IDisposable {
 		this.TurnCounter = 0;
 		this.board.Clear();
 		this.binlog.Clear();
-		foreach(Player player in this.Players)
+		foreach(Player player in this.Players) {
 			player.InvalidOperationCount = 0;
+			player.Hand.Clear();
+		}
 		this.Victor = null;
 
 		this.hooks.PreGamePrep(this);
