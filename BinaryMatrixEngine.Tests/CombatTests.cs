@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using static BinaryMatrix.Engine.Axiom;
 using static BinaryMatrix.Engine.CellName;
 using static BinaryMatrix.Engine.Value;
@@ -12,6 +13,7 @@ public class CombatTests {
 	public static readonly IEqualityComparer<CardList> cardListComparer = new CardListComparer(new StrictCardComparer());
 	public static readonly IEqualityComparer<GameBoard> gameBoardComparer = new GameBoardComparer(new CellComparer(cardListComparer));
 
+	[MustDisposeResource]
 	private static GameContext CreateScenarioContext(int[]? rngSequence = null) {
 		Player attacker = new(PlayerRole.ATTACKER, 0, new TestPlayerActor());
 		Player defender = new(PlayerRole.DEFENDER, 0, new TestPlayerActor());
@@ -22,7 +24,7 @@ public class CombatTests {
 
 	[TestMethod]
 	public void SimpleTrapDefender() {
-		GameContext game = CreateScenarioContext();
+		using GameContext game = CreateScenarioContext();
 		game.board[A0].cards.Add(new Card(EIGHT, CHAOS));
 		game.board[D0].cards.AddRange([ new Card(TRAP, CHAOS), new Card(TRAP, CHOICE) ]);
 
@@ -48,7 +50,7 @@ public class CombatTests {
 
 	[TestMethod]
 	public void WildDefense() {
-		GameContext game = CreateScenarioContext();
+		using GameContext game = CreateScenarioContext();
 		game.board[A0].cards.Add(new Card(EIGHT, CHAOS));
 		game.board[D0].cards.AddRange([ new Card(FIVE, CHAOS), new Card(WILD, CHAOS) ]);
 		GameExecution.ResolveCombat(game, game.board[0], game.Attackers[0], out CombatLog log);
@@ -80,7 +82,7 @@ public class CombatTests {
 
 	[TestMethod]
 	public void BounceDefense() {
-		GameContext game = CreateScenarioContext();
+		using GameContext game = CreateScenarioContext();
 		game.board[A0].cards.Add(new Card(EIGHT, CHAOS));
 		game.board[D0].cards.AddRange([ new Card(BOUNCE, CHAOS) ]);
 		GameExecution.ResolveCombat(game, game.board[0], game.Attackers[0], out CombatLog log);
@@ -112,7 +114,7 @@ public class CombatTests {
 
 	[TestMethod]
 	public void BreakDefense() {
-		GameContext game = CreateScenarioContext();
+		using GameContext game = CreateScenarioContext();
 		game.board[A0].cards.Add(new Card(TWO, CHAOS));
 		game.board[D0].cards.AddRange([ new Card(THREE, CHAOS), new Card(THREE, CHOICE), new Card(BREAK, CHAOS) ]);
 		GameExecution.ResolveCombat(game, game.board[0], game.Attackers[0], out CombatLog log);
@@ -142,7 +144,7 @@ public class CombatTests {
 
 	[TestMethod]
 	public void BreakDefenseCombat() {
-		GameContext game = CreateScenarioContext();
+		using GameContext game = CreateScenarioContext();
 		game.board[A0].cards.Add(new Card(TWO, CHAOS));
 		game.board[D0].cards.AddRange([ new Card(THREE, CHAOS), new Card(THREE, CHOICE), new Card(BREAK, CHAOS) { revealed = true } ]);
 		GameExecution.ResolveCombat(game, game.board[0], game.Defenders[0], out CombatLog log);
@@ -172,7 +174,7 @@ public class CombatTests {
 
 	[TestMethod]
 	public void BreakDefenseMistakeCombat() {
-		GameContext game = CreateScenarioContext();
+		using GameContext game = CreateScenarioContext();
 		game.board[A0].cards.Add(new Card(EIGHT, CHAOS));
 		game.board[D0].cards.AddRange([ new Card(FOUR, CHAOS), new Card(BREAK, CHAOS) { revealed = true } ]);
 		game.board[L0].cards.AddRange([ new Card(TWO, KIN), new Card(FIVE, CHAOS) ]);
@@ -205,7 +207,7 @@ public class CombatTests {
 
 	[TestMethod]
 	public void BreakDefenseBlunderCombat() {
-		GameContext game = CreateScenarioContext();
+		using GameContext game = CreateScenarioContext();
 		game.board[A0].cards.AddRange([ new Card(EIGHT, CHAOS), new Card(EIGHT, CHOICE) ]);
 		game.board[D0].cards.AddRange([ new Card(FOUR, CHAOS), new Card(BREAK, CHAOS) { revealed = true } ]);
 		game.board[L0].cards.AddRange([ new Card(FIVE, CHAOS) ]);
@@ -239,7 +241,7 @@ public class CombatTests {
 
 	[TestMethod]
 	public void SimpleVictoryDefense() {
-		GameContext game = CreateScenarioContext();
+		using GameContext game = CreateScenarioContext();
 		game.board[A0].cards.Add(new Card(EIGHT, CHAOS));
 		game.board[D0].cards.AddRange([ new Card(TEN, CHAOS), new Card(SIX, CHAOS) ]);
 		GameExecution.ResolveCombat(game, game.board[0], game.Attackers[0], out CombatLog log);
@@ -268,7 +270,7 @@ public class CombatTests {
 
 	[TestMethod]
 	public void SimpleTrapAttacker() {
-		GameContext game = CreateScenarioContext();
+		using GameContext game = CreateScenarioContext();
 		game.board[A0].cards.AddRange([ new Card(TRAP, CHAOS), new Card(EIGHT, CHAOS) ]);
 		game.board[D0].cards.Add(new Card(BOUNCE, CHAOS));
 		GameExecution.ResolveCombat(game, game.board[0], game.Attackers[0], out CombatLog log);
@@ -299,7 +301,7 @@ public class CombatTests {
 
 	[TestMethod]
 	public void BounceAttack() {
-		GameContext game = CreateScenarioContext();
+		using GameContext game = CreateScenarioContext();
 		game.board[A0].cards.Add(new Card(BOUNCE, CHAOS));
 		game.board[D0].cards.Add(new Card(FOUR, CHAOS));
 		GameExecution.ResolveCombat(game, game.board[0], game.Attackers[0], out CombatLog log);
@@ -327,7 +329,7 @@ public class CombatTests {
 
 	[TestMethod]
 	public void BreakAttack() {
-		GameContext game = CreateScenarioContext();
+		using GameContext game = CreateScenarioContext();
 		game.board[A0].cards.AddRange([ new Card(TWO, CHAOS), new Card(BREAK, CHAOS) ]);
 		game.board[D0].cards.AddRange([ new Card(THREE, CHAOS), new Card(THREE, CHOICE), new Card(THREE, KIN) ]);
 		GameExecution.ResolveCombat(game, game.board[0], game.Attackers[0], out CombatLog log);
@@ -358,7 +360,7 @@ public class CombatTests {
 
 	[TestMethod]
 	public void SimpleVictoryAttacker() {
-		GameContext game = CreateScenarioContext();
+		using GameContext game = CreateScenarioContext();
 		game.board[A0].cards.AddRange([ new Card(TEN, CHAOS), new Card(SIX, CHAOS) ]);
 		game.board[D0].cards.AddRange([ new Card(EIGHT, CHAOS) ]);
 		GameExecution.ResolveCombat(game, game.board[0], game.Attackers[0], out CombatLog log);
@@ -387,7 +389,7 @@ public class CombatTests {
 
 	[TestMethod]
 	public void ReshuffleDeckVictoryAttacker() {
-		GameContext game = CreateScenarioContext([
+		using GameContext game = CreateScenarioContext([
 			3, 0, 0, 1, 0
 		]);
 		game.board[A0].cards.AddRange([ new Card(TEN, CHAOS), new Card(SIX, CHAOS) ]);
@@ -442,7 +444,7 @@ public class CombatTests {
 
 	[TestMethod]
 	public void ReshuffleOpenDeckVictoryAttacker() {
-		GameContext game = CreateScenarioContext([
+		using GameContext game = CreateScenarioContext([
 			1, 0, 2, 0, 0
 		]);
 		game.board[A3].cards.AddRange([ new Card(TEN, CHAOS), new Card(SIX, CHAOS) ]);
