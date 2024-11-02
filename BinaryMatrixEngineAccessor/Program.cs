@@ -10,7 +10,7 @@ public static class Program {
 		ConsolePlayerActor defender = new();
 		defender.player = new Player(new PlayerID(PlayerRole.DEFENDER, 0), defender);
 
-		GameContext context = new(new[] { attacker.player, defender.player }, new RandomRNG(new Random(1024)), GameHooks.Default);
+		GameContext context = new(new[] { attacker.player, defender.player }, new SFC32RNG(0xFA1703, 0xCCCC_CCCC, 0x3141_5926), GameHooks.Default);
 
 		context.Setup();
 
