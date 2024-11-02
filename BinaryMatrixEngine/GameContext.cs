@@ -137,6 +137,8 @@ public sealed class GameContext : IDisposable {
 
 	public void Dispose() {
 		this.board.Dispose();
+		foreach(Player player in this.Players)
+			player.Dispose();
 	}
 }
 
