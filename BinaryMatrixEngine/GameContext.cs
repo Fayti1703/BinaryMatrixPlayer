@@ -36,7 +36,7 @@ public readonly struct GameState {
 
 [PublicAPI]
 public sealed class GameContext : IDisposable {
-	public int TurnCounter { get; private set; }
+	public int TurnCounter { get; internal set; }
 	public IReadOnlyList<Player> Attackers { get; }
 	public IReadOnlyList<Player> Defenders { get; }
 	public readonly GameBoard board;
