@@ -4,6 +4,10 @@ using Microsoft.AspNetCore.Rewrite;
 using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Environment.WebRootPath = Path.Join(builder.Environment.ContentRootPath, "static");
+builder.Environment.WebRootFileProvider = new PhysicalFileProvider(builder.Environment.WebRootPath);
+
 var app = builder.Build();
 
 /* app.MapGet("/", () => "Hello World!"); */
@@ -27,7 +31,6 @@ app.Use(async (context, next) => {
 	await next(context);
 });
 
-PhysicalFileProvider fileProvider = new(Path.Join(app.Environment.ContentRootPath, "static"));
 
 app.UseRewriter(new RewriteOptions().Add(context => {
 
@@ -39,11 +42,11 @@ app.UseRewriter(new RewriteOptions().Add(context => {
 	}
 
 	string indexPath = request.Path.Value + "index.html";
-	if(fileProvider.GetFileInfo(indexPath).Exists)
+	if(app.Environment.WebRootFileProvider.GetFileInfo(indexPath).Exists)
 		request.Path = new PathString(indexPath);
 }));
 
-app.UseStaticFiles(new StaticFileOptions { FileProvider = fileProvider });
+app.UseStaticFiles();
 
 Thread backgroundRunnerThread = new(BackgroundRunner.Run);
 
