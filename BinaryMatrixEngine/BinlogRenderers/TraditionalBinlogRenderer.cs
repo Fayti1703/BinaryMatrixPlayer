@@ -199,8 +199,7 @@ internal class StringArrayBuilder : IReadOnlyList<string> {
 	public string[] ToArray() => this.entries.ToArray();
 
 	public IEnumerator<string> GetEnumerator() => this.entries.GetEnumerator();
-	[MustDisposeResource]
-	IEnumerator IEnumerable.GetEnumerator() => ( (IEnumerable) this.entries ).GetEnumerator();
+	IEnumerator IEnumerable.GetEnumerator() => this.entries.GetEnumerator();
 	public int Count => this.entries.Count;
 
 	public string this[int index] {
