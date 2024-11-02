@@ -6,7 +6,7 @@ using Fayti1703.CommonLib.Enumeration;
 namespace BinaryMatrix.Engine.Tests;
 
 public class GameBoardComparer : IEqualityComparer<GameBoard> {
-	private IEqualityComparer<Cell> cellComparer;
+	private readonly IEqualityComparer<Cell> cellComparer;
 
 	public GameBoardComparer(IEqualityComparer<Cell> cellComparer) {
 		this.cellComparer = cellComparer;
@@ -31,10 +31,10 @@ public class GameBoardComparer : IEqualityComparer<GameBoard> {
 }
 
 public class CellComparer : IEqualityComparer<Cell> {
-	private IEqualityComparer<CardList> cardsComparerer;
+	private readonly IEqualityComparer<CardList> cardsComparer;
 
-	public CellComparer(IEqualityComparer<CardList> cardsComparerer) {
-		this.cardsComparerer = cardsComparerer;
+	public CellComparer(IEqualityComparer<CardList> cardsComparer) {
+		this.cardsComparer = cardsComparer;
 	}
 
 	public bool Equals(Cell? x, Cell? y) {
@@ -42,7 +42,7 @@ public class CellComparer : IEqualityComparer<Cell> {
 		return
 			x.name == y.name &&
 			x.Revealed == y.Revealed &&
-			this.cardsComparerer.Equals(x.cards, y.cards)
+			this.cardsComparer.Equals(x.cards, y.cards)
 		;
 	}
 
@@ -82,6 +82,35 @@ public class StrictCardComparer : IEqualityComparer<Card> {
 	}
 }
 
+public class ActionLogComparer : IEqualityComparer<ActionLog> {
+	private readonly IEqualityComparer<IReadOnlyList<CardMoveLog>> moveLogComparer;
+	private readonly IEqualityComparer<CombatLog> combatLogComparer;
+
+	public ActionLogComparer(
+		IEqualityComparer<IReadOnlyList<CardMoveLog>> moveLogComparer,
+		IEqualityComparer<CombatLog> combatLogComparer
+	) {
+		this.moveLogComparer = moveLogComparer;
+		this.combatLogComparer = combatLogComparer;
+	}
+	public bool Equals(ActionLog x, ActionLog y) {
+		if(!x.whoDidThis.Equals(y.whoDidThis))  return false;
+		if(!x.resolvedAction.Equals(y.resolvedAction)) return false;
+		if(this.moveLogComparer.Equals(x.moveResults, y.moveResults)) return false;
+		if((x.combatLog == null) != (y.combatLog == null)) return false;
+		return x.combatLog == null || this.combatLogComparer.Equals(x.combatLog.Value, y.combatLog!.Value);
+	}
+
+	public int GetHashCode(ActionLog obj) {
+		HashCode hash = new();
+		hash.Add(obj.whoDidThis);
+		hash.Add(obj.resolvedAction);
+		hash.Add(obj.moveResults == null ? 0 : this.moveLogComparer.GetHashCode(obj.moveResults));
+		hash.Add(obj.combatLog == null ? 0 : this.combatLogComparer.GetHashCode(obj.combatLog.Value));
+		return hash.ToHashCode();
+	}
+}
+
 public class CombatLogComparer : IEqualityComparer<CombatLog> {
 	private readonly IEqualityComparer<IReadOnlyList<CombatSpecialLog>> specialsComparer;
 	private readonly IEqualityComparer<IReadOnlyList<CardMoveLog>> resultsComparer;
@@ -94,14 +123,6 @@ public class CombatLogComparer : IEqualityComparer<CombatLog> {
 		this.specialsComparer = specialsComparer;
 		this.resultsComparer = resultsComparer;
 		this.cardIDsComparer = new ElementwiseComparer<CardID>(EqualityComparer<CardID>.Default);
-	}
-	
-	public static CombatLogComparer CreateDefault() {
-		IEqualityComparer<IReadOnlyList<CardMoveLog>> cardMoveLogComparer = new ElementwiseComparer<CardMoveLog>(new CardMoveLogComparer());
-		return new CombatLogComparer(
-			new ElementwiseComparer<CombatSpecialLog>(new CombatSpecialLogComparer(cardMoveLogComparer)),
-			cardMoveLogComparer
-		);
 	}
 
 	public bool Equals(CombatLog x, CombatLog y) {
@@ -176,5 +197,24 @@ public class ElementwiseComparer<T> : IEqualityComparer<IReadOnlyList<T>> {
 
 	public int GetHashCode(IReadOnlyList<T> obj) {
 		return obj.Select(this.elementComparer.GetHashCode!).Aggregate(1, HashCode.Combine);
+	}
+}
+
+
+internal static class Comparers {
+	internal static readonly IEqualityComparer<CardList> CardList;
+	internal static readonly IEqualityComparer<GameBoard> GameBoard;
+	internal static readonly IEqualityComparer<IReadOnlyList<CardMoveLog>> CardMoveLogs;
+	internal static readonly IEqualityComparer<CombatLog> CombatLog;
+	internal static readonly IEqualityComparer<ActionLog> ActionLog;
+	static Comparers() {
+		CardList = new CardListComparer(new StrictCardComparer());
+		GameBoard = new GameBoardComparer(new CellComparer(CardList));
+		CardMoveLogs = new ElementwiseComparer<CardMoveLog>(new CardMoveLogComparer());
+		CombatLog = new CombatLogComparer(
+			new ElementwiseComparer<CombatSpecialLog>(new CombatSpecialLogComparer(CardMoveLogs)),
+			CardMoveLogs
+		);
+		ActionLog = new ActionLogComparer(CardMoveLogs, CombatLog);
 	}
 }
