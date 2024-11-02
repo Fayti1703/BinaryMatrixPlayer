@@ -1,0 +1,42 @@
+name: Build
+permissions:
+  contents: read
+on:
+  - workflow_dispatch
+  - workflow_call
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build all projects
+        run: |
+          cd BinaryMatrixPlayer
+          dotnet build -c Release
+      - name: Consolidate outputs
+        run: |
+          mkdir out
+          for project in "BinaryMatrixEngine" "BinaryMatrixPlayer" "BinaryMatrixAccessor" do
+            cp -r BinaryMatrixPlayer/$project/.bin/Release/net7.0/ out/$project
+          done
+      - name: Push Engine Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Engine
+          path: out/BinaryMatrixEngine/*
+      - name: Push Accessor Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Accessor
+          path: out/BinaryMatrixAccessor/
+      - name: Push Player Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Player
+          path: out/BinaryMatrixPlayer/
