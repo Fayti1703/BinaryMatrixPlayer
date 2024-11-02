@@ -82,6 +82,35 @@ public class StrictCardComparer : IEqualityComparer<Card> {
 	}
 }
 
+public class ActionLogComparer : IEqualityComparer<ActionLog> {
+	private readonly IEqualityComparer<IReadOnlyList<CardMoveLog>> moveLogComparer;
+	private readonly IEqualityComparer<CombatLog> combatLogComparer;
+
+	public ActionLogComparer(
+		IEqualityComparer<IReadOnlyList<CardMoveLog>> moveLogComparer,
+		IEqualityComparer<CombatLog> combatLogComparer
+	) {
+		this.moveLogComparer = moveLogComparer;
+		this.combatLogComparer = combatLogComparer;
+	}
+	public bool Equals(ActionLog x, ActionLog y) {
+		if(!x.whoDidThis.Equals(y.whoDidThis))  return false;
+		if(!x.resolvedAction.Equals(y.resolvedAction)) return false;
+		if(this.moveLogComparer.Equals(x.moveResults, y.moveResults)) return false;
+		if((x.combatLog == null) != (y.combatLog == null)) return false;
+		return x.combatLog == null || this.combatLogComparer.Equals(x.combatLog.Value, y.combatLog!.Value);
+	}
+
+	public int GetHashCode(ActionLog obj) {
+		HashCode hash = new();
+		hash.Add(obj.whoDidThis);
+		hash.Add(obj.resolvedAction);
+		hash.Add(obj.moveResults == null ? 0 : this.moveLogComparer.GetHashCode(obj.moveResults));
+		hash.Add(obj.combatLog == null ? 0 : this.combatLogComparer.GetHashCode(obj.combatLog.Value));
+		return hash.ToHashCode();
+	}
+}
+
 public class CombatLogComparer : IEqualityComparer<CombatLog> {
 	private readonly IEqualityComparer<IReadOnlyList<CombatSpecialLog>> specialsComparer;
 	private readonly IEqualityComparer<IReadOnlyList<CardMoveLog>> resultsComparer;
@@ -185,6 +214,7 @@ internal static class Comparers {
 	internal static readonly IEqualityComparer<GameBoard> GameBoard;
 	internal static readonly IEqualityComparer<IReadOnlyList<CardMoveLog>> CardMoveLogs;
 	internal static readonly IEqualityComparer<CombatLog> CombatLog;
+	internal static readonly IEqualityComparer<ActionLog> ActionLog;
 	static Comparers() {
 		CardList = new CardListComparer(new StrictCardComparer());
 		GameBoard = new GameBoardComparer(new CellComparer(CardList));
@@ -193,5 +223,6 @@ internal static class Comparers {
 			new ElementwiseComparer<CombatSpecialLog>(new CombatSpecialLogComparer(CardMoveLogs)),
 			CardMoveLogs
 		);
+		ActionLog = new ActionLogComparer(CardMoveLogs, CombatLog);
 	}
 }
