@@ -31,7 +31,11 @@ public sealed class CardList : IEnumerable<Card>, IDisposable {
 	public CardList() {}
 
 	public CardList(int initialCapacity) {
-		this.cards = listPool.Rent(initialCapacity);
+		if(initialCapacity < 0)
+			throw new ArgumentException("Initial capacity must be non-negative.", nameof(initialCapacity));
+
+		if(initialCapacity != 0)
+			this.cards = listPool.Rent(initialCapacity);
 	}
 
 	public CardList(IEnumerable<Card> cards) {
