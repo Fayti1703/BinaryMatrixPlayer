@@ -6,7 +6,7 @@ using Fayti1703.CommonLib.Enumeration;
 namespace BinaryMatrix.Engine.Tests;
 
 public class GameBoardComparer : IEqualityComparer<GameBoard> {
-	private IEqualityComparer<Cell> cellComparer;
+	private readonly IEqualityComparer<Cell> cellComparer;
 
 	public GameBoardComparer(IEqualityComparer<Cell> cellComparer) {
 		this.cellComparer = cellComparer;
@@ -31,10 +31,10 @@ public class GameBoardComparer : IEqualityComparer<GameBoard> {
 }
 
 public class CellComparer : IEqualityComparer<Cell> {
-	private IEqualityComparer<CardList> cardsComparerer;
+	private readonly IEqualityComparer<CardList> cardsComparer;
 
-	public CellComparer(IEqualityComparer<CardList> cardsComparerer) {
-		this.cardsComparerer = cardsComparerer;
+	public CellComparer(IEqualityComparer<CardList> cardsComparer) {
+		this.cardsComparer = cardsComparer;
 	}
 
 	public bool Equals(Cell? x, Cell? y) {
@@ -42,7 +42,7 @@ public class CellComparer : IEqualityComparer<Cell> {
 		return
 			x.name == y.name &&
 			x.Revealed == y.Revealed &&
-			this.cardsComparerer.Equals(x.cards, y.cards)
+			this.cardsComparer.Equals(x.cards, y.cards)
 		;
 	}
 
@@ -123,14 +123,6 @@ public class CombatLogComparer : IEqualityComparer<CombatLog> {
 		this.specialsComparer = specialsComparer;
 		this.resultsComparer = resultsComparer;
 		this.cardIDsComparer = new ElementwiseComparer<CardID>(EqualityComparer<CardID>.Default);
-	}
-	
-	public static CombatLogComparer CreateDefault() {
-		IEqualityComparer<IReadOnlyList<CardMoveLog>> cardMoveLogComparer = new ElementwiseComparer<CardMoveLog>(new CardMoveLogComparer());
-		return new CombatLogComparer(
-			new ElementwiseComparer<CombatSpecialLog>(new CombatSpecialLogComparer(cardMoveLogComparer)),
-			cardMoveLogComparer
-		);
 	}
 
 	public bool Equals(CombatLog x, CombatLog y) {
