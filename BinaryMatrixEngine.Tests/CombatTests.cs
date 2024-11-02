@@ -9,10 +9,6 @@ namespace BinaryMatrix.Engine.Tests;
 
 [TestClass]
 public class CombatTests {
-	public static readonly CombatLogComparer combatLogComparer = CombatLogComparer.CreateDefault();
-	public static readonly IEqualityComparer<CardList> cardListComparer = new CardListComparer(new StrictCardComparer());
-	public static readonly IEqualityComparer<GameBoard> gameBoardComparer = new GameBoardComparer(new CellComparer(cardListComparer));
-
 	[MustDisposeResource]
 	private static GameContext CreateScenarioContext(int[]? rngSequence = null) {
 		Player attacker = new(PlayerRole.ATTACKER, 0, new TestPlayerActor());
@@ -39,13 +35,13 @@ public class CombatTests {
 			attackerPower: 0, defenderPower: 0, damage: 0,
 			results: Array.Empty<CardMoveLog>(),
 			victorDeclared: false
-		), log, combatLogComparer);
+		), log, Comparers.CombatLog);
 
 		GameBoard expectedBoard = new();
 		expectedBoard[D0].cards.AddRange([ new Card(TRAP, CHAOS) { revealed = true }, new Card(TRAP, CHOICE) { revealed = true } ]);
 		expectedBoard[D0].Revealed = true;
 		expectedBoard[X0].cards.Add(new Card(EIGHT, CHAOS) { revealed = true });
-		Assert.AreEqual(expectedBoard, game.board, gameBoardComparer);
+		Assert.AreEqual(expectedBoard, game.board, Comparers.GameBoard);
 	}
 
 	[TestMethod]
@@ -68,7 +64,7 @@ public class CombatTests {
 				new CardMoveLog([ new CardID(WILD, CHAOS) ], XA)
 			],
 			victorDeclared: false
-		), log, combatLogComparer);
+		), log, Comparers.CombatLog);
 
 		GameBoard expectedBoard = new();
 		expectedBoard[D0].cards.Add(new Card(FIVE, CHAOS) { revealed = true });
@@ -77,7 +73,7 @@ public class CombatTests {
 			new Card(EIGHT, CHAOS) { revealed = true },
 			new Card(WILD, CHAOS) { revealed = true }
 		]);
-		Assert.AreEqual(expectedBoard, game.board, gameBoardComparer);
+		Assert.AreEqual(expectedBoard, game.board, Comparers.GameBoard);
 	}
 
 	[TestMethod]
@@ -102,14 +98,14 @@ public class CombatTests {
 				new CardMoveLog([ new CardID(EIGHT, CHAOS) ], XA),
 			],
 			victorDeclared: false
-		), log, combatLogComparer);
+		), log, Comparers.CombatLog);
 
 		GameBoard expectedBoard = new();
 		expectedBoard[XA].cards.AddRange([
 			new Card(BOUNCE, CHAOS) { revealed = true },
 			new Card(EIGHT, CHAOS) { revealed = true }
 		]);
-		Assert.AreEqual(expectedBoard, game.board, gameBoardComparer);
+		Assert.AreEqual(expectedBoard, game.board, Comparers.GameBoard);
 	}
 
 	[TestMethod]
@@ -130,7 +126,7 @@ public class CombatTests {
 				new CardMoveLog([ new CardID(BREAK, CHAOS), new CardID(THREE, CHOICE), new CardID(THREE, CHAOS) ], XA)
 			],
 			victorDeclared: false
-		), log, combatLogComparer);
+		), log, Comparers.CombatLog);
 
 		GameBoard expectedBoard = new();
 		expectedBoard[XA].cards.AddRange([
@@ -139,7 +135,7 @@ public class CombatTests {
 			new Card(THREE, CHOICE) { revealed = true },
 			new Card(THREE, CHAOS) { revealed = true }
 		]);
-		Assert.AreEqual(expectedBoard, game.board, gameBoardComparer);
+		Assert.AreEqual(expectedBoard, game.board, Comparers.GameBoard);
 	}
 
 	[TestMethod]
@@ -160,7 +156,7 @@ public class CombatTests {
 				new CardMoveLog([ new CardID(BREAK, CHAOS), new CardID(THREE, CHOICE), new CardID(THREE, CHAOS) ], XA)
 			],
 			victorDeclared: false
-		), log, combatLogComparer);
+		), log, Comparers.CombatLog);
 
 		GameBoard expectedBoard = new();
 		expectedBoard[XA].cards.AddRange([
@@ -169,7 +165,7 @@ public class CombatTests {
 			new Card(THREE, CHOICE) { revealed = true },
 			new Card(THREE, CHAOS) { revealed = true }
 		]);
-		Assert.AreEqual(expectedBoard, game.board, gameBoardComparer);
+		Assert.AreEqual(expectedBoard, game.board, Comparers.GameBoard);
 	}
 
 	[TestMethod]
@@ -192,7 +188,7 @@ public class CombatTests {
 				new CardMoveLog([ CardID.Unknown ], new PlayerID(PlayerRole.ATTACKER, 0))
 			],
 			victorDeclared: false
-		), log, combatLogComparer);
+		), log, Comparers.CombatLog);
 
 		GameBoard expectedBoard = new();
 		expectedBoard[XA].cards.AddRange([
@@ -201,8 +197,8 @@ public class CombatTests {
 			new Card(FOUR, CHAOS) { revealed = true },
 		]);
 		expectedBoard[L0].cards.AddRange([ new Card(TWO, KIN) ]);
-		Assert.AreEqual(expectedBoard, game.board, gameBoardComparer);
-		Assert.AreEqual(game.Attackers[0].Hand, new CardList { new(FIVE, CHAOS) }, cardListComparer);
+		Assert.AreEqual(expectedBoard, game.board, Comparers.GameBoard);
+		Assert.AreEqual(game.Attackers[0].Hand, new CardList { new(FIVE, CHAOS) }, Comparers.CardList);
 	}
 
 	[TestMethod]
@@ -225,7 +221,7 @@ public class CombatTests {
 				new CardMoveLog([ CardID.Unknown ], new PlayerID(PlayerRole.ATTACKER, 0))
 			],
 			victorDeclared: true
-		), log, combatLogComparer);
+		), log, Comparers.CombatLog);
 
 		GameBoard expectedBoard = new();
 		expectedBoard[XA].cards.AddRange([
@@ -234,8 +230,8 @@ public class CombatTests {
 			new Card(BREAK, CHAOS) { revealed = true },
 			new Card(FOUR, CHAOS) { revealed = true },
 		]);
-		Assert.AreEqual(expectedBoard, game.board, gameBoardComparer);
-		Assert.AreEqual(game.Attackers[0].Hand, new CardList { new(FIVE, CHAOS) }, cardListComparer);
+		Assert.AreEqual(expectedBoard, game.board, Comparers.GameBoard);
+		Assert.AreEqual(game.Attackers[0].Hand, new CardList { new(FIVE, CHAOS) }, Comparers.CardList);
 		Assert.AreEqual(game.Victor, PlayerRole.ATTACKER);
 	}
 
@@ -256,7 +252,7 @@ public class CombatTests {
 				new CardMoveLog([ new CardID(EIGHT, CHAOS) ], X0),
 			],
 			victorDeclared: false
-		), log, combatLogComparer);
+		), log, Comparers.CombatLog);
 
 		GameBoard expectedBoard = new();
 		expectedBoard[D0].cards.AddRange([
@@ -265,7 +261,7 @@ public class CombatTests {
 		]);
 		expectedBoard[D0].Revealed = true;
 		expectedBoard[X0].cards.Add(new Card(EIGHT, CHAOS) { revealed = true });
-		Assert.AreEqual(expectedBoard, game.board, gameBoardComparer);
+		Assert.AreEqual(expectedBoard, game.board, Comparers.GameBoard);
 	}
 
 	[TestMethod]
@@ -287,7 +283,7 @@ public class CombatTests {
 				new CardMoveLog([ new CardID(TRAP, CHAOS), new CardID(EIGHT, CHAOS) ], XA)
 			],
 			victorDeclared: true
-		), log, combatLogComparer);
+		), log, Comparers.CombatLog);
 
 		GameBoard expectedBoard = new();
 		expectedBoard[XA].cards.AddRange([
@@ -295,7 +291,7 @@ public class CombatTests {
 			new Card(TRAP, CHAOS) { revealed = true },
 			new Card(EIGHT, CHAOS) { revealed = true }
 		]);
-		Assert.AreEqual(expectedBoard, game.board, gameBoardComparer);
+		Assert.AreEqual(expectedBoard, game.board, Comparers.GameBoard);
 		Assert.AreEqual(game.Victor, PlayerRole.ATTACKER);
 	}
 
@@ -316,7 +312,7 @@ public class CombatTests {
 			attackerPower: 0, defenderPower: 0, damage: 0,
 			results: [],
 			victorDeclared: false
-		), log, combatLogComparer);
+		), log, Comparers.CombatLog);
 
 		GameBoard expectedBoard = new();
 		expectedBoard[D0].cards.AddRange([
@@ -324,7 +320,7 @@ public class CombatTests {
 		]);
 		expectedBoard[D0].Revealed = true;
 		expectedBoard[X0].cards.Add(new Card(BOUNCE, CHAOS) { revealed = true });
-		Assert.AreEqual(expectedBoard, game.board, gameBoardComparer);
+		Assert.AreEqual(expectedBoard, game.board, Comparers.GameBoard);
 	}
 
 	[TestMethod]
@@ -345,7 +341,7 @@ public class CombatTests {
 				new CardMoveLog([ new CardID(THREE, KIN), new CardID(THREE, CHOICE), new CardID(THREE, CHAOS) ], XA)
 			],
 			victorDeclared: false
-		), log, combatLogComparer);
+		), log, Comparers.CombatLog);
 
 		GameBoard expectedBoard = new();
 		expectedBoard[XA].cards.AddRange([
@@ -355,7 +351,7 @@ public class CombatTests {
 			new Card(THREE, CHOICE) { revealed = true },
 			new Card(THREE, CHAOS) { revealed = true }
 		]);
-		Assert.AreEqual(expectedBoard, game.board, gameBoardComparer);
+		Assert.AreEqual(expectedBoard, game.board, Comparers.GameBoard);
 	}
 
 	[TestMethod]
@@ -376,7 +372,7 @@ public class CombatTests {
 				new CardMoveLog([ new CardID(EIGHT, CHAOS) ], XA)
 			],
 			victorDeclared: true
-		), log, combatLogComparer);
+		), log, Comparers.CombatLog);
 
 		GameBoard expectedBoard = new();
 		expectedBoard[XA].cards.AddRange([
@@ -384,7 +380,7 @@ public class CombatTests {
 			new Card(SIX, CHAOS) { revealed = true },
 			new Card(EIGHT, CHAOS) { revealed = true }
 		]);
-		Assert.AreEqual(expectedBoard, game.board, gameBoardComparer);
+		Assert.AreEqual(expectedBoard, game.board, Comparers.GameBoard);
 	}
 
 	[TestMethod]
@@ -421,7 +417,7 @@ public class CombatTests {
 				], new PlayerID(PlayerRole.ATTACKER, 0))
 			],
 			victorDeclared: false
-		), log, combatLogComparer);
+		), log, Comparers.CombatLog);
 
 		GameBoard expectedBoard = new();
 		expectedBoard[XA].cards.AddRange([
@@ -432,14 +428,14 @@ public class CombatTests {
 			new Card(EIGHT, VOID),
 			new Card(SEVEN, CHAOS),
 		]);
-		Assert.AreEqual(expectedBoard, game.board, gameBoardComparer);
+		Assert.AreEqual(expectedBoard, game.board, Comparers.GameBoard);
 		Assert.AreEqual(game.Attackers[0].Hand, new CardList {
 			new(TRAP, VOID),
 			new(THREE, VOID),
 			new(TWO, FORM),
 			new(TWO, CHAOS),
 			new(SIX, DATA)
-		}, cardListComparer);
+		}, Comparers.CardList);
 	}
 
 	[TestMethod]
@@ -476,7 +472,7 @@ public class CombatTests {
 				], new PlayerID(PlayerRole.ATTACKER, 0))
 			],
 			victorDeclared: false
-		), log, combatLogComparer);
+		), log, Comparers.CombatLog);
 
 		GameBoard expectedBoard = new();
 		expectedBoard[XA].cards.AddRange([
@@ -487,13 +483,13 @@ public class CombatTests {
 			new Card(FOUR, KIN),
 			new Card(BREAK, FORM) { revealed = true },
 		]);
-		Assert.AreEqual(expectedBoard, game.board, gameBoardComparer);
+		Assert.AreEqual(expectedBoard, game.board, Comparers.GameBoard);
 		Assert.AreEqual(game.Attackers[0].Hand, new CardList {
 			new(SEVEN, KIN),
 			new(FIVE, KIN),
 			new(FIVE, DATA),
 			new(THREE, KIN),
 			new(TWO, DATA)
-		}, cardListComparer);
+		}, Comparers.CardList);
 	}
 }

@@ -178,3 +178,20 @@ public class ElementwiseComparer<T> : IEqualityComparer<IReadOnlyList<T>> {
 		return obj.Select(this.elementComparer.GetHashCode!).Aggregate(1, HashCode.Combine);
 	}
 }
+
+
+internal static class Comparers {
+	internal static readonly IEqualityComparer<CardList> CardList;
+	internal static readonly IEqualityComparer<GameBoard> GameBoard;
+	internal static readonly IEqualityComparer<IReadOnlyList<CardMoveLog>> CardMoveLogs;
+	internal static readonly IEqualityComparer<CombatLog> CombatLog;
+	static Comparers() {
+		CardList = new CardListComparer(new StrictCardComparer());
+		GameBoard = new GameBoardComparer(new CellComparer(CardList));
+		CardMoveLogs = new ElementwiseComparer<CardMoveLog>(new CardMoveLogComparer());
+		CombatLog = new CombatLogComparer(
+			new ElementwiseComparer<CombatSpecialLog>(new CombatSpecialLogComparer(CardMoveLogs)),
+			CardMoveLogs
+		);
+	}
+}
