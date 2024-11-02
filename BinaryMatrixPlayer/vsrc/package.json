@@ -1,0 +1,22 @@
+{
+	"name": "@fayti1703/binary-matrix-player",
+	"type": "module",
+	"version": "0.1.0",
+	"description": "",
+	"keywords": [],
+	"author": "",
+	"license": "MPL-2.0",
+	"private": true,
+	"devDependencies": {
+		"@rollup/plugin-node-resolve": "^15.2.3",
+		"@types/node": "^20.12.13",
+		"vite": "^5.2.11"
+	},
+	"dependencies": {
+		"solid-js": "^1.8.17"
+	},
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build"
+	}
+}

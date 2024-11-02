@@ -1,0 +1,19 @@
+{
+	"buildOptions": {
+
+	},
+	"compilerOptions": {
+		"strict": true,
+		"noUncheckedIndexedAccess": false,
+		"noEmit": true,
+		"alwaysStrict": true,
+		"importsNotUsedAsValues": "error",
+		"lib": [
+			"ES2022",
+			"DOM"
+		]
+	},
+	"include": [
+		"./js/**.ts"
+	]
+}

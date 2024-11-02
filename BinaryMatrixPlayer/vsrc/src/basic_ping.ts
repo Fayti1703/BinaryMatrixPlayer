@@ -1,8 +1,5 @@
 
-
-
 document.addEventListener("DOMContentLoaded", () => {
-
 	const wsURL = new URL("/connect-socket", document.baseURI);
 	wsURL.protocol = "ws://";
 
@@ -34,11 +31,10 @@ document.addEventListener("DOMContentLoaded", () => {
 	document.getElementById("ping-form").addEventListener("submit", (ev) => {
 		ev.preventDefault();
 		if(socket.readyState === WebSocket.OPEN) {
-			const data = new FormData(ev.target);
+			const data = new FormData(ev.target as HTMLFormElement);
 			socket.send(data.get("data"));
 		} else {
 			error.appendChild(new Text("socket not connected"));
 		}
 	});
-
 })
