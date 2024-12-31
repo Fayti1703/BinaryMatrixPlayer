@@ -96,7 +96,7 @@ public class ActionLogComparer : IEqualityComparer<ActionLog> {
 	public bool Equals(ActionLog x, ActionLog y) {
 		if(!x.whoDidThis.Equals(y.whoDidThis))  return false;
 		if(!x.resolvedAction.Equals(y.resolvedAction)) return false;
-		if(this.moveLogComparer.Equals(x.moveResults, y.moveResults)) return false;
+		if(!this.moveLogComparer.Equals(x.moveResults, y.moveResults)) return false;
 		if((x.combatLog == null) != (y.combatLog == null)) return false;
 		return x.combatLog == null || this.combatLogComparer.Equals(x.combatLog.Value, y.combatLog!.Value);
 	}
