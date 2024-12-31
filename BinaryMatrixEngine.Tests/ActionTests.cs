@@ -35,7 +35,7 @@ public class ActionTests {
 		Assert.AreEqual(new ActionLog(
 			whoDidThis: new PlayerID(PlayerRole.ATTACKER, 0),
 			resolvedAction: new ResolvedActionSet(ActionType.DRAW, ActionSet.LANE_A),
-			moveResults: CardMoveLog.SingleMove(new CardID(BOUNCE, KIN), new PlayerID(PlayerRole.ATTACKER, 0))
+			moveResults: CardMoveLog.SingleMove(CardID.Unknown, new PlayerID(PlayerRole.ATTACKER, 0))
 		), log, Comparers.ActionLog);
 
 		GameBoard expectedBoard = new();
