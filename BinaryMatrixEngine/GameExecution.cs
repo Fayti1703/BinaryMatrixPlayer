@@ -82,13 +82,13 @@ public static class GameExecution {
 							new ResolvedActionSet(ActionType.DRAW, action.lane),
 							ImmutableList<CardMoveLog>.Empty
 						);
+					} else {
+						log = new ActionLog(
+							log.whoDidThis,
+							new ResolvedActionSet(ActionType.DRAW, action.lane),
+							CardMoveLog.SingleMove(drawnCard, log.whoDidThis)
+						);
 					}
-
-					log = new ActionLog(
-						log.whoDidThis,
-						new ResolvedActionSet(ActionType.DRAW, action.lane),
-						CardMoveLog.SingleMove(drawnCard, log.whoDidThis)
-					);
 				}
 			} break;
 			case ActionType.PLAY:
