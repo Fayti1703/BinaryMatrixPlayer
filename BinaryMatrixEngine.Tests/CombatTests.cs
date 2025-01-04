@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using JetBrains.Annotations;
 using static BinaryMatrix.Engine.Axiom;
 using static BinaryMatrix.Engine.CellName;
 using static BinaryMatrix.Engine.Value;

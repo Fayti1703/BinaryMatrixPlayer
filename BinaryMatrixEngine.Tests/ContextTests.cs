@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using Fayti1703.CommonLib.Enumeration;
 
 namespace BinaryMatrix.Engine.Tests;
