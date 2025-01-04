@@ -200,6 +200,22 @@ public class ElementwiseComparer<T> : IEqualityComparer<IReadOnlyList<T>> {
 	}
 }
 
+public class TurnLogComparer : IEqualityComparer<TurnLog> {
+	private readonly IEqualityComparer<IReadOnlyList<ActionLog>> actionLogsComparer;
+
+	public TurnLogComparer(IEqualityComparer<IReadOnlyList<ActionLog>> actionLogsComparer) {
+		this.actionLogsComparer = actionLogsComparer;
+	}
+
+	public bool Equals(TurnLog x, TurnLog y) {
+		return x.turnNumber == y.turnNumber && this.actionLogsComparer.Equals(x.actions, y.actions);
+	}
+
+	public int GetHashCode(TurnLog obj) {
+		return HashCode.Combine(obj.turnNumber, this.actionLogsComparer.GetHashCode(obj.actions));
+	}
+}
+
 
 internal static class Comparers {
 	internal static readonly IEqualityComparer<CardList> CardList;
@@ -207,6 +223,8 @@ internal static class Comparers {
 	internal static readonly IEqualityComparer<IReadOnlyList<CardMoveLog>> CardMoveLogs;
 	internal static readonly IEqualityComparer<CombatLog> CombatLog;
 	internal static readonly IEqualityComparer<ActionLog> ActionLog;
+	internal static readonly IEqualityComparer<TurnLog> TurnLog;
+	internal static readonly IEqualityComparer<IReadOnlyList<TurnLog>> TurnLogs;
 	static Comparers() {
 		CardList = new CardListComparer(new StrictCardComparer());
 		GameBoard = new GameBoardComparer(new CellComparer(CardList));
@@ -216,5 +234,7 @@ internal static class Comparers {
 			CardMoveLogs
 		);
 		ActionLog = new ActionLogComparer(CardMoveLogs, CombatLog);
+		TurnLog = new TurnLogComparer(new ElementwiseComparer<ActionLog>(ActionLog));
+		TurnLogs = new ElementwiseComparer<TurnLog>(TurnLog);
 	}
 }
