@@ -60,7 +60,7 @@ public sealed class CardList : IEnumerable<Card>, IDisposable {
 	public CardList(IList<Card> cards) {
 		this.cards = listPool.Rent(cards.Count);
 		cards.CopyTo(this.cards, 0);
-		this.Count = this.cards.Length;
+		this.Count = cards.Count;
 		if(FAIL_FAST_INVALID) {
 			foreach(ref Card card in this) {
 				if(card.IsInvalid)
