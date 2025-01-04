@@ -34,7 +34,7 @@ public class TraditionalBinlogRenderer : BinlogRenderer<string[]> {
 
 	private static void RenderCombatLog(StringArrayBuilder builder, CombatLog combatLog) {
 		builder.Append("`n--` c").Append(combatLog.inLane).Append(" / ");
-		RenderCardList(builder.c, combatLog.initialAS).Append("/ ");
+		RenderCardList(builder.c, combatLog.initialAS).Append(" / ");
 		RenderCardList(builder.c, combatLog.initialDS);
 		builder.BreakEntry();
 		int remainingCardsInDS = combatLog.initialDS.Count;
@@ -67,6 +67,8 @@ public class TraditionalBinlogRenderer : BinlogRenderer<string[]> {
 		}
 
 		/* no special victor declaration */
+
+		builder.BreakEntry();
 	}
 
 	private static StringBuilder RenderCardList(StringBuilder builder, IEnumerable<CardID> cardIDs) {
