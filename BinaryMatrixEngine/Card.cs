@@ -56,7 +56,7 @@ public readonly struct CardID : IEquatable<CardID> {
 	public bool IsUnknown => this.axiom == 0 || this.value == 0;
 
 	static CardID() {
-		allIDs = Enum.GetValues<Value>().SelectMany(_ => Enum.GetValues<Axiom>(), (value, axiom) => new CardID(value, axiom)).ToImmutableList();
+		allIDs = Enum.GetValues<Value>().SelectMany(_ => Enum.GetValues<Axiom>(), (value, axiom) => new CardID(value, axiom)).ToImmutableArray();
 	}
 
 	public static readonly IReadOnlyList<CardID> allIDs;
@@ -164,7 +164,7 @@ public struct Card : IEquatable<Card> {
 	public static bool operator !=(Card left, Card right) => !left.Equals(right);
 
 	static Card() {
-		allCards = CardID.allIDs.Select(x => new Card(x)).ToImmutableList();
+		allCards = CardID.allIDs.Select(x => new Card(x)).ToImmutableArray();
 	}
 
 	public static readonly IReadOnlyList<Card> allCards;

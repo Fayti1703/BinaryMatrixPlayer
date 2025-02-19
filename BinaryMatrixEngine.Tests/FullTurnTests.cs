@@ -86,7 +86,7 @@ public class FullTurnTests {
 					new CombatLog(2,
 						new[] { new CardID(EIGHT, KIN), new CardID(EIGHT, FORM), new CardID(BREAK, CHOICE) },
 						new[] { new CardID(FOUR, VOID) },
-						ImmutableList<CombatSpecialLog>.Empty,
+						ImmutableArray<CombatSpecialLog>.Empty,
 						4, 2, 4,
 						new[] {
 							new CardMoveLog(new[] { new CardID(EIGHT, KIN), new CardID(EIGHT, FORM), new CardID(BREAK, CHOICE) }, XA),

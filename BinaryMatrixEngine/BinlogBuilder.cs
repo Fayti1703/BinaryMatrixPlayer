@@ -39,7 +39,7 @@ public struct CardMoveLogBuilder {
 
 	public IReadOnlyList<CardMoveLog> Finish() {
 		this.EndCurrentSet();
-		return (IReadOnlyList<CardMoveLog>?) this.results ?? ImmutableList<CardMoveLog>.Empty;
+		return (IReadOnlyList<CardMoveLog>?) this.results ?? ImmutableArray<CardMoveLog>.Empty;
 	}
 
 	public IReadOnlyList<CardMoveLog>? FinishOptional() {
@@ -69,7 +69,7 @@ public struct CombatLogBuilder {
 			this.inLane,
 			this.initialAS,
 			this.initialDS,
-			(IReadOnlyList<CombatSpecialLog>?) this.specials ?? ImmutableList<CombatSpecialLog>.Empty,
+			(IReadOnlyList<CombatSpecialLog>?) this.specials ?? ImmutableArray<CombatSpecialLog>.Empty,
 			this.attackerPower,
 			this.defenderPower,
 			this.damage,

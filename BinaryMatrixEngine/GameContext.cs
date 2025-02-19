@@ -53,8 +53,8 @@ public sealed class GameContext : IDisposable {
 
 	private GameContext(IEnumerable<Player> players, RNG rng, GameHooks hooks, GameBoard board, List<TurnLog> binlog) {
 		/* fallbacks */
-		this.Attackers = ImmutableList<Player>.Empty;
-		this.Defenders = ImmutableList<Player>.Empty;
+		this.Attackers = ImmutableArray<Player>.Empty;
+		this.Defenders = ImmutableArray<Player>.Empty;
 		foreach(IGrouping<PlayerRole,Player> group in players.GroupBy(x => x.Role)) {
 			switch(group.Key) {
 				case PlayerRole.ATTACKER:
@@ -102,10 +102,10 @@ public sealed class GameContext : IDisposable {
 	public GameState SaveState() {
 		return new GameState(
 			this.TurnCounter,
-			this.Players.Select(x => x.data.Copy()).ToImmutableList(),
+			this.Players.Select(x => x.data.Copy()).ToImmutableArray(),
 			this.board.Copy(),
 			this.Victor,
-			this.binlog.ToImmutableList()
+			this.binlog.ToImmutableArray()
 		);
 	}
 

@@ -80,7 +80,7 @@ public static class GameExecution {
 						log = new ActionLog(
 							log.whoDidThis,
 							new ResolvedActionSet(ActionType.DRAW, action.lane),
-							ImmutableList<CardMoveLog>.Empty
+							ImmutableArray<CardMoveLog>.Empty
 						);
 					} else {
 						log = new ActionLog(
@@ -208,8 +208,8 @@ public static class GameExecution {
 	internal static void ResolveCombat(GameContext context, Lane lane, Player player, out CombatLog combatLog) {
 		CombatLogBuilder log = new() {
 			inLane = lane.laneNo,
-			initialAS = lane.attackerStack.cards.Select(x => x.ID).ToImmutableList(),
-			initialDS = lane.defenderStack.cards.Select(x => x.ID).ToImmutableList()
+			initialAS = lane.attackerStack.cards.Select(x => x.ID).ToImmutableArray(),
+			initialDS = lane.defenderStack.cards.Select(x => x.ID).ToImmutableArray()
 		};
 		bool defenseFirst = player.Role == PlayerRole.DEFENDER;
 		if(defenseFirst) {
