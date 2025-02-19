@@ -24,7 +24,7 @@ jobs:
       - name: Prepare .NET tools
         run: |
           cd BinaryMatrixEngine.Tests
-          dotnet tool restore
+          dotnet tool restore --verbosity diagnostic
       - name: Run Tests with Coverage
         id: run_tests
         continue-on-error: true
