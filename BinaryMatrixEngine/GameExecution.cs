@@ -395,7 +395,7 @@ public static class GameExecution {
 		CardList cardList = new(cards);
 
 		for(int i = cardList.Count - 1; i > 0; i--) {
-			int j = rng.Next(i);
+			int j = rng.Next(i + 1);
 			(cardList[i], cardList[j]) = (cardList[j], cardList[i]);
 		}
 
